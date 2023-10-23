@@ -581,13 +581,6 @@ namespace CobaScanner
                 }
                 if (e.ProgressPercentage == -1)
                 {
-                    this.form1.Invoke((MethodInvoker)delegate
-                    {
-                        if (this.form1.WindowState == FormWindowState.Normal && this.form1.TopLevel == true)
-                        {
-                            MessageBox.Show(code, "ERROR");
-                        }
-                    });
                     result["request"] = "onScanError";
                     result["error"] = code;
                 }
@@ -614,6 +607,19 @@ namespace CobaScanner
                         socket.Send(result.ToJsonString());
                     else
                         socket = null;
+                }
+                //show messagebox after send socket
+                if (e.ProgressPercentage == -1)
+                {
+                    this.form1.Invoke((MethodInvoker)delegate
+                    {
+                        if (this.form1.WindowState == FormWindowState.Normal && this.form1.TopLevel == true)
+                        {
+                            MessageBox.Show(code, "ERROR");
+                        }
+                    });
+                    result["request"] = "onScanError";
+                    result["error"] = code;
                 }
             };
             DoScanWorker.RunWorkerCompleted += (object sender, RunWorkerCompletedEventArgs e) =>
