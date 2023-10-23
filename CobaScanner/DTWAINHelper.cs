@@ -239,7 +239,7 @@ namespace CobaScanner
                 }
                 if (e.ProgressPercentage == -1)
                 {
-                    if (this.form1.WindowState == FormWindowState.Normal)
+                    if (this.form1.WindowState == FormWindowState.Normal && this.form1.TopLevel == true)
                     {
                         MessageBox.Show(message, "ERROR");
                     }
@@ -353,7 +353,7 @@ namespace CobaScanner
                 }
                 if (e.ProgressPercentage == -1)
                 {
-                    if (this.form1.WindowState == FormWindowState.Normal)
+                    if (this.form1.WindowState == FormWindowState.Normal && this.form1.TopLevel == true)
                     {
                         MessageBox.Show(message, "ERROR");
                     }
@@ -422,7 +422,7 @@ namespace CobaScanner
                     args.Paper = ConfigHelper.Conf.Paper;
                     CurrentSelectedScanner = ConfigHelper.Conf.Scanner;
                 }
-                if (CurrentSelectedScanner.Length==0)
+                if (CurrentSelectedScanner.Length == 0)
                 {
                     DoScanWorker.ReportProgress(-1, "SCANNER_NULL");
                     return;
@@ -583,7 +583,7 @@ namespace CobaScanner
                 {
                     this.form1.Invoke((MethodInvoker)delegate
                     {
-                        if (this.form1.WindowState==FormWindowState.Normal)
+                        if (this.form1.WindowState == FormWindowState.Normal && this.form1.TopLevel == true)
                         {
                             MessageBox.Show(code, "ERROR");
                         }
