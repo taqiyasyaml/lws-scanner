@@ -183,38 +183,41 @@ namespace CobaScanner
                 if (PtrArraySources != IntPtr.Zero)
                 {
                     int CountSources = TwainAPI.DTWAIN_ArrayGetCount(PtrArraySources);
-                    int PercentageEachSource = 80 / CountSources;
-                    for (int ISource = 0; ISource < CountSources; ISource++)
+                    if (CountSources > 0)
                     {
-                        DoGetScanWorker.ReportProgress(10 + ISource * PercentageEachSource, "DTWAIN_ArrayGetSourceAt");
-                        DTWAIN_SOURCE PtrSource = IntPtr.Zero;
-                        TwainAPI.DTWAIN_ArrayGetSourceAt(PtrArraySources, ISource, ref PtrSource);
-                        if (PtrSource != IntPtr.Zero)
+                        int PercentageEachSource = 80 / CountSources;
+                        for (int ISource = 0; ISource < CountSources; ISource++)
                         {
-                            StringBuilder SourceName = new StringBuilder(256);
-                            TwainAPI.DTWAIN_GetSourceProductName(PtrSource, SourceName, 255);
-                            result.Scanners.Add(SourceName.ToString());
-                            if ((
-                            (DTWAINHelper.SelectedScanner.Length == 0 && ConfigHelper.Conf.Scanner.Equals(SourceName.ToString())) ||
-                            DTWAINHelper.SelectedScanner.Equals(SourceName.ToString())
-                            ) && result.SelectedScanner == null)
+                            DoGetScanWorker.ReportProgress(10 + ISource * PercentageEachSource, "DTWAIN_ArrayGetSourceAt");
+                            DTWAIN_SOURCE PtrSource = IntPtr.Zero;
+                            TwainAPI.DTWAIN_ArrayGetSourceAt(PtrArraySources, ISource, ref PtrSource);
+                            if (PtrSource != IntPtr.Zero)
                             {
-                                result.SelectedScanner = new ScannerProperties();
-                                result.SelectedScanner.ProductName = SourceName.ToString();
-                                result.SelectedScanner.IsSupportFeeder = TwainAPI.DTWAIN_IsFeederSupported(PtrSource) == 1;
-                                if (result.SelectedScanner.IsSupportFeeder)
+                                StringBuilder SourceName = new StringBuilder(256);
+                                TwainAPI.DTWAIN_GetSourceProductName(PtrSource, SourceName, 255);
+                                result.Scanners.Add(SourceName.ToString());
+                                if ((
+                                (DTWAINHelper.SelectedScanner.Length == 0 && ConfigHelper.Conf.Scanner.Equals(SourceName.ToString())) ||
+                                DTWAINHelper.SelectedScanner.Equals(SourceName.ToString())
+                                ) && result.SelectedScanner == null)
                                 {
-                                    result.SelectedScanner.IsSupportDuplex = TwainAPI.DTWAIN_IsDuplexSupported(PtrSource) == 1;
-                                }
-                                else
-                                {
-                                    result.SelectedScanner.IsSupportDuplex = false;
+                                    result.SelectedScanner = new ScannerProperties();
+                                    result.SelectedScanner.ProductName = SourceName.ToString();
+                                    result.SelectedScanner.IsSupportFeeder = TwainAPI.DTWAIN_IsFeederSupported(PtrSource) == 1;
+                                    if (result.SelectedScanner.IsSupportFeeder)
+                                    {
+                                        result.SelectedScanner.IsSupportDuplex = TwainAPI.DTWAIN_IsDuplexSupported(PtrSource) == 1;
+                                    }
+                                    else
+                                    {
+                                        result.SelectedScanner.IsSupportDuplex = false;
+                                    }
                                 }
                             }
-                        }
-                        else
-                        {
-                            DoGetScanWorker.ReportProgress(-1, "SCANNER_NOT_FOUND");
+                            else
+                            {
+                                DoGetScanWorker.ReportProgress(-1, "SCANNER_NOT_FOUND");
+                            }
                         }
                     }
                 }
