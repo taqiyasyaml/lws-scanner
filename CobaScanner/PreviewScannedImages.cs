@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace CobaScanner
 {
@@ -43,14 +44,22 @@ namespace CobaScanner
         public void ClearImages()
         {
             PreviewScannedImages.IndexImage = -1;
-            PreviewScannedImages.ScannedImages.Clear();
             this.form1.Invoke((MethodInvoker)delegate
             {
+                if (this.ScanImage.Image != null)
+                {
+                    this.ScanImage.Image.Dispose();
+                }
                 this.ScanImage.Image = null;
                 this.NextImage.Enabled = false;
                 this.PreviousImage.Enabled = false;
                 this.ImageLabel.Text = "";
             });
+            for (int IImage = 0; IImage < PreviewScannedImages.ScannedImages.Count; IImage++)
+            {
+                PreviewScannedImages.ScannedImages[IImage].ImgStream.Dispose();
+            }
+            PreviewScannedImages.ScannedImages.Clear();
         }
 
         public void AddImage(int Acq, int Page, MemoryStream ImgStream)
@@ -62,6 +71,11 @@ namespace CobaScanner
                 ImageMetadata TmpImg = PreviewScannedImages.ScannedImages[IndexImage];
                 this.form1.Invoke((MethodInvoker)delegate
                 {
+                    if (this.ScanImage.Image != null)
+                    {
+                        this.ScanImage.Image.Dispose();
+                        this.ScanImage.Image = null;
+                    }
                     this.ScanImage.Image = new Bitmap(TmpImg.ImgStream);
                     this.NextImage.Enabled = false;
                     this.PreviousImage.Enabled = false;
@@ -85,6 +99,11 @@ namespace CobaScanner
                 ImageMetadata TmpImg = PreviewScannedImages.ScannedImages[IndexImage];
                 this.form1.Invoke((MethodInvoker)delegate
                 {
+                    if (this.ScanImage.Image != null)
+                    {
+                        this.ScanImage.Image.Dispose();
+                        this.ScanImage.Image = null;
+                    }
                     this.ScanImage.Image = new Bitmap(TmpImg.ImgStream);
                     this.NextImage.Enabled = (PreviewScannedImages.IndexImage + 1) < PreviewScannedImages.ScannedImages.Count;
                     this.PreviousImage.Enabled = (PreviewScannedImages.IndexImage - 1) >= 0;
@@ -103,6 +122,11 @@ namespace CobaScanner
                     ImageMetadata TmpImg = PreviewScannedImages.ScannedImages[IndexImage];
                     this.form1.Invoke((MethodInvoker)delegate
                     {
+                        if (this.ScanImage.Image != null)
+                        {
+                            this.ScanImage.Image.Dispose();
+                            this.ScanImage.Image = null;
+                        }
                         this.ScanImage.Image = new Bitmap(TmpImg.ImgStream);
                         this.NextImage.Enabled = false;
                         this.PreviousImage.Enabled = false;
@@ -120,6 +144,11 @@ namespace CobaScanner
                 ImageMetadata TmpImg = PreviewScannedImages.ScannedImages[IndexImage];
                 this.form1.Invoke((MethodInvoker)delegate
                 {
+                    if (this.ScanImage.Image != null)
+                    {
+                        this.ScanImage.Image.Dispose();
+                        this.ScanImage.Image = null;
+                    }
                     this.ScanImage.Image = new Bitmap(TmpImg.ImgStream);
                     this.NextImage.Enabled = (PreviewScannedImages.IndexImage + 1) < PreviewScannedImages.ScannedImages.Count;
                     this.PreviousImage.Enabled = (PreviewScannedImages.IndexImage - 1) >= 0;
@@ -138,6 +167,11 @@ namespace CobaScanner
                     ImageMetadata TmpImg = PreviewScannedImages.ScannedImages[IndexImage];
                     this.form1.Invoke((MethodInvoker)delegate
                     {
+                        if (this.ScanImage.Image != null)
+                        {
+                            this.ScanImage.Image.Dispose();
+                            this.ScanImage.Image = null;
+                        }
                         this.ScanImage.Image = new Bitmap(TmpImg.ImgStream);
                         this.NextImage.Enabled = false;
                         this.PreviousImage.Enabled = false;
