@@ -6,20 +6,39 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Drawing.Imaging;
 using System.Diagnostics;
-using Dynarithmic32;
 
-using DTWAIN_ARRAY = System.IntPtr;
-using DTWAIN_BOOL = System.Int32;
-using DTWAIN_FLOAT = System.Double;
-using DTWAIN_FRAME = System.IntPtr;
-using DTWAIN_HANDLE = System.IntPtr;
-using DTWAIN_IDENTITY = System.Int32;
-using DTWAIN_OCRENGINE = System.IntPtr;
-using DTWAIN_LONG = System.Int32;
-using DTWAIN_LONG64 = System.Int64;
-using DTWAIN_PDFTEXTELEMENT = System.IntPtr;
-using DTWAIN_RANGE = System.IntPtr;
+/*  Use this for 32-bit compilation */
+using Dynarithmic32;
 using DTWAIN_SOURCE = System.IntPtr;
+using DTWAIN_ARRAY = System.IntPtr;
+using DTWAIN_RANGE = System.IntPtr;
+using DTWAIN_FRAME = System.IntPtr;
+using DTWAIN_PDFTEXTELEMENT = System.IntPtr;
+using DTWAIN_HANDLE = System.IntPtr;
+using DTWAIN_IDENTITY = System.IntPtr;
+using DTWAIN_OCRENGINE = System.IntPtr;
+using DTWAIN_OCRTEXTINFOHANDLE = System.IntPtr;
+using TW_UINT16 = System.UInt16;
+using TW_UINT32 = System.UInt32;
+using TW_BOOL = System.UInt16;
+using DTWAIN_MEMORY_PTR = System.IntPtr;
+
+/*  Use this for 64-bit compilation */
+/*using Dynarithmic64;
+using DTWAIN_SOURCE = System.IntPtr;
+using DTWAIN_ARRAY = System.IntPtr;
+using DTWAIN_RANGE = System.IntPtr;
+using DTWAIN_FRAME = System.IntPtr;
+using DTWAIN_PDFTEXTELEMENT = System.IntPtr;
+using DTWAIN_HANDLE = System.IntPtr;
+using DTWAIN_IDENTITY = System.IntPtr;
+using DTWAIN_OCRENGINE = System.IntPtr;
+using DTWAIN_OCRTEXTINFOHANDLE = System.IntPtr;
+using TW_UINT16 = System.UInt16;
+using TW_UINT32 = System.UInt32;
+using TW_BOOL = System.UInt16;
+using DTWAIN_MEMORY_PTR = System.IntPtr;*/
+
 using static System.Runtime.CompilerServices.RuntimeHelpers;
 using Fleck;
 using System.Text.Json.Nodes;
@@ -568,7 +587,7 @@ namespace CobaScanner
                                     String Base64Scan = "data:image/jpeg;base64," + Convert.ToBase64String(StreamScan.ToArray());
                                     JDib.Add(Base64Scan);
                                     BmpScan.Dispose();
-                                    Debug.WriteLine(Base64Scan);
+                                    /*Debug.WriteLine(Base64Scan);*/
                                 }
                                 JAcq.Add(JDib);
                             }
