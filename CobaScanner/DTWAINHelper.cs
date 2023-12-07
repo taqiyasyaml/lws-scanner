@@ -43,6 +43,8 @@ namespace CobaScanner
         private Label brightnessLabel;
         private TrackBar contrastInput;
         private Label contrastLabel;
+        private TrackBar qualityInput;
+        private Label qualityLabel;
         private Button stopScanButton;
 
         public static bool IsDTWAINBusy = false;
@@ -64,6 +66,7 @@ namespace CobaScanner
             public int Resolution = 200;
             public int Brightness = 0;
             public int Contrast = 0;
+            public long Quality = 100;
         }
         private class ScannerProperties
         {
@@ -77,7 +80,13 @@ namespace CobaScanner
             public ScannerProperties? SelectedScanner;
         }
 
-        public DTWAINHelper(PreviewScannedImages viewScanImages, ConfigHelper conf, Form1 form1, ListBox scannerBox, Label scannerLabel, ComboBox sourceBox, ComboBox paperBox, ComboBox colorBox, NumericUpDown resolutionInput, TrackBar brightnessInput, Label brightnessLabel, TrackBar contrastInput, Label contrastLabel, Button stopScanButton)
+        public DTWAINHelper(
+            PreviewScannedImages viewScanImages, ConfigHelper conf, Form1 form1, 
+            ListBox scannerBox, Label scannerLabel, 
+            ComboBox sourceBox, ComboBox paperBox, ComboBox colorBox, 
+            NumericUpDown resolutionInput, TrackBar brightnessInput, Label brightnessLabel, TrackBar contrastInput, Label contrastLabel, TrackBar qualityInput, Label qualityLabel,
+            Button stopScanButton
+        )
         {
             this.ViewScanImages = viewScanImages;
             this.Conf = conf;
@@ -93,8 +102,10 @@ namespace CobaScanner
             this.brightnessLabel = brightnessLabel;
             this.contrastInput = contrastInput;
             this.contrastLabel = contrastLabel;
+            this.qualityInput = qualityInput;
+            this.qualityLabel = qualityLabel;
             this.stopScanButton = stopScanButton;
-
+            
             this.InitDoGetScanWorker();
             this.InitDoSetScanWorker();
             this.InitDoScanWorker();
@@ -117,6 +128,8 @@ namespace CobaScanner
             brightnessLabel.Text = ConfigHelper.Conf.Brightness.ToString();
             contrastInput.Value = ConfigHelper.Conf.Contrast;
             contrastLabel.Text = ConfigHelper.Conf.Contrast.ToString();
+            qualityInput.Value = ConfigHelper.Conf.Quality;
+            qualityLabel.Text = ConfigHelper.Conf.Quality.ToString();
         }
         private void ClearSelectedScanner()
         {
@@ -440,6 +453,18 @@ namespace CobaScanner
                     DoScanWorker.ReportProgress(-1, "DTWAIN_NOT_FOUND");
                     return;
                 }
+
+                //START CONSTRUCT ENCODER
+                ImageCodecInfo JpegCodecInfo = ImageCodecInfo.GetImageEncoders().First(c => c.FormatID == ImageFormat.Jpeg.Guid);
+                EncoderParameters EncoderParams = new EncoderParameters();
+
+                //Param for image quality
+                System.Drawing.Imaging.Encoder EncoderTypeQuality = System.Drawing.Imaging.Encoder.Quality;
+                EncoderParameter EncodeParamQuality = new EncoderParameter(EncoderTypeQuality, args.Quality);
+                EncoderParams.Param[0] = EncodeParamQuality;
+
+                //END CONSTRUCT ENCODER
+
                 DoScanWorker.ReportProgress(1, "DTWAIN_SysInitialize");
                 TwainAPI.DTWAIN_SysInitialize();
                 DTWAINHelper.IsDTWAINBusy = true;
@@ -538,10 +563,11 @@ namespace CobaScanner
                                     DTWAIN_HANDLE PtrDib = TwainAPI.DTWAIN_GetAcquiredImage(AcqArray, IAcq, IDib);
                                     Bitmap BmpScan = Bitmap.FromHbitmap(TwainAPI.DTWAIN_ConvertDIBToBitmap(PtrDib, IntPtr.Zero));
                                     MemoryStream StreamScan = new MemoryStream();
-                                    BmpScan.Save(StreamScan, ImageFormat.Jpeg);
+                                    BmpScan.Save(StreamScan, JpegCodecInfo, EncoderParams);
                                     this.ViewScanImages.AddImage(IAcq, IDib, StreamScan);
                                     String Base64Scan = "data:image/jpeg;base64," + Convert.ToBase64String(StreamScan.ToArray());
                                     JDib.Add(Base64Scan);
+                                    BmpScan.Dispose();
                                     Debug.WriteLine(Base64Scan);
                                 }
                                 JAcq.Add(JDib);
@@ -659,6 +685,7 @@ namespace CobaScanner
                 args.Resolution = int.Parse(this.resolutionInput.Value.ToString());
                 args.Brightness = this.brightnessInput.Value;
                 args.Contrast = this.contrastInput.Value;
+                args.Quality = this.qualityInput.Value;
             });
             return args;
         }

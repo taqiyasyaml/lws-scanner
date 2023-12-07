@@ -57,6 +57,11 @@ namespace CobaScanner
             this.contrastLabel.Text = this.contrastInput.Value.ToString();
         }
 
+        private void qualityInput_Scroll(object sender, EventArgs e)
+        {
+            this.qualityLabel.Text = this.qualityInput.Value.ToString();
+        }
+
         private void stopScanButton_Click(object sender, EventArgs e)
         {
             DTWAINHelper.KeepScanning = false;
@@ -77,9 +82,9 @@ namespace CobaScanner
                 this.ShowInTaskbar = false;
                 this.Hide();
             }
-            configHelper = new ConfigHelper(this, scannerBox, sourceBox, paperBox, colorBox, resolutionInput, brightnessInput, brightnessLabel, contrastInput, contrastLabel, portInput, whiteListBox);
+            configHelper = new ConfigHelper(this, scannerBox, sourceBox, paperBox, colorBox, resolutionInput, brightnessInput, brightnessLabel, contrastInput, contrastLabel, qualityInput, qualityLabel, portInput, whiteListBox);
             scannedImages = new PreviewScannedImages(this, this.scanPicture, this.nextScanButton, this.previousScanButton, this.scanImagePositionLabel);
-            DtwainHelper = new DTWAINHelper(scannedImages, configHelper, this, scannerBox, scannerLabel, sourceBox, paperBox, colorBox, resolutionInput, brightnessInput, brightnessLabel, contrastInput, contrastLabel, stopScanButton);
+            DtwainHelper = new DTWAINHelper(scannedImages, configHelper, this, scannerBox, scannerLabel, sourceBox, paperBox, colorBox, resolutionInput, brightnessInput, brightnessLabel, contrastInput, contrastLabel, qualityInput, qualityLabel, stopScanButton);
             webSocketHelper = new WebSocketHelper(configHelper, this, this.portInput, this.startStopWSButton, this.whiteListBox, DtwainHelper);
             DtwainHelper.DoGetScannerList();
             webSocketHelper.StartWS();

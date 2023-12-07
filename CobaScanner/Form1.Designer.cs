@@ -67,11 +67,15 @@
             previousScanButton = new Button();
             nextScanButton = new Button();
             scanImagePositionLabel = new Label();
+            qualityLabel = new Label();
+            qualityInput = new TrackBar();
+            label13 = new Label();
             ((System.ComponentModel.ISupportInitialize)resolutionInput).BeginInit();
             ((System.ComponentModel.ISupportInitialize)brightnessInput).BeginInit();
             ((System.ComponentModel.ISupportInitialize)contrastInput).BeginInit();
             ((System.ComponentModel.ISupportInitialize)portInput).BeginInit();
             ((System.ComponentModel.ISupportInitialize)scanPicture).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)qualityInput).BeginInit();
             SuspendLayout();
             // 
             // label1
@@ -259,7 +263,7 @@
             // 
             // startScanButton
             // 
-            startScanButton.Location = new Point(135, 475);
+            startScanButton.Location = new Point(135, 525);
             startScanButton.Name = "startScanButton";
             startScanButton.Size = new Size(110, 23);
             startScanButton.TabIndex = 19;
@@ -276,7 +280,7 @@
             // 
             // resetSettingButton
             // 
-            resetSettingButton.Location = new Point(10, 475);
+            resetSettingButton.Location = new Point(10, 525);
             resetSettingButton.Name = "resetSettingButton";
             resetSettingButton.Size = new Size(110, 23);
             resetSettingButton.TabIndex = 18;
@@ -287,7 +291,7 @@
             // stopScanButton
             // 
             stopScanButton.Enabled = false;
-            stopScanButton.Location = new Point(260, 475);
+            stopScanButton.Location = new Point(260, 525);
             stopScanButton.Name = "stopScanButton";
             stopScanButton.Size = new Size(110, 23);
             stopScanButton.TabIndex = 20;
@@ -299,7 +303,7 @@
             // 
             label7.AutoSize = true;
             label7.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
-            label7.Location = new Point(10, 510);
+            label7.Location = new Point(10, 560);
             label7.Name = "label7";
             label7.Size = new Size(99, 15);
             label7.TabIndex = 21;
@@ -307,7 +311,7 @@
             // 
             // portInput
             // 
-            portInput.Location = new Point(135, 510);
+            portInput.Location = new Point(135, 560);
             portInput.Maximum = new decimal(new int[] { 65535, 0, 0, 0 });
             portInput.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             portInput.Name = "portInput";
@@ -317,7 +321,7 @@
             // 
             // startStopWSButton
             // 
-            startStopWSButton.Location = new Point(260, 510);
+            startStopWSButton.Location = new Point(260, 560);
             startStopWSButton.Name = "startStopWSButton";
             startStopWSButton.Size = new Size(110, 23);
             startStopWSButton.TabIndex = 23;
@@ -329,7 +333,7 @@
             // 
             whiteListBox.FormattingEnabled = true;
             whiteListBox.ItemHeight = 15;
-            whiteListBox.Location = new Point(10, 570);
+            whiteListBox.Location = new Point(10, 620);
             whiteListBox.Name = "whiteListBox";
             whiteListBox.Size = new Size(360, 94);
             whiteListBox.TabIndex = 25;
@@ -338,7 +342,7 @@
             // 
             label9.AutoSize = true;
             label9.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
-            label9.Location = new Point(10, 540);
+            label9.Location = new Point(10, 590);
             label9.Name = "label9";
             label9.Size = new Size(111, 15);
             label9.TabIndex = 24;
@@ -346,7 +350,7 @@
             // 
             // deleteWhiteList
             // 
-            deleteWhiteList.Location = new Point(260, 540);
+            deleteWhiteList.Location = new Point(260, 590);
             deleteWhiteList.Name = "deleteWhiteList";
             deleteWhiteList.Size = new Size(110, 23);
             deleteWhiteList.TabIndex = 26;
@@ -356,7 +360,7 @@
             // 
             // saveSettingButton
             // 
-            saveSettingButton.Location = new Point(10, 670);
+            saveSettingButton.Location = new Point(10, 720);
             saveSettingButton.Name = "saveSettingButton";
             saveSettingButton.Size = new Size(360, 30);
             saveSettingButton.TabIndex = 27;
@@ -366,7 +370,7 @@
             // 
             // startupButton
             // 
-            startupButton.Location = new Point(10, 710);
+            startupButton.Location = new Point(10, 760);
             startupButton.Name = "startupButton";
             startupButton.Size = new Size(175, 30);
             startupButton.TabIndex = 28;
@@ -376,7 +380,7 @@
             // 
             // desktopButton
             // 
-            desktopButton.Location = new Point(195, 710);
+            desktopButton.Location = new Point(195, 760);
             desktopButton.Name = "desktopButton";
             desktopButton.Size = new Size(175, 30);
             desktopButton.TabIndex = 29;
@@ -387,7 +391,7 @@
             // label10
             // 
             label10.ForeColor = SystemColors.ControlDarkDark;
-            label10.Location = new Point(410, 700);
+            label10.Location = new Point(410, 740);
             label10.Name = "label10";
             label10.Size = new Size(360, 50);
             label10.TabIndex = 30;
@@ -445,11 +449,45 @@
             scanImagePositionLabel.Text = "label12";
             scanImagePositionLabel.TextAlign = ContentAlignment.MiddleCenter;
             // 
+            // qualityLabel
+            // 
+            qualityLabel.AutoSize = true;
+            qualityLabel.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            qualityLabel.Location = new Point(10, 500);
+            qualityLabel.Name = "qualityLabel";
+            qualityLabel.Size = new Size(13, 15);
+            qualityLabel.TabIndex = 38;
+            qualityLabel.Text = "0";
+            // 
+            // qualityInput
+            // 
+            qualityInput.Location = new Point(120, 485);
+            qualityInput.Maximum = 100;
+            qualityInput.Name = "qualityInput";
+            qualityInput.Size = new Size(250, 45);
+            qualityInput.TabIndex = 37;
+            qualityInput.TickStyle = TickStyle.None;
+            qualityInput.Value = 100;
+            qualityInput.Scroll += qualityInput_Scroll;
+            // 
+            // label13
+            // 
+            label13.AutoSize = true;
+            label13.Font = new Font("Segoe UI", 8F, FontStyle.Bold, GraphicsUnit.Point);
+            label13.Location = new Point(10, 485);
+            label13.Name = "label13";
+            label13.Size = new Size(108, 13);
+            label13.TabIndex = 36;
+            label13.Text = "Quality (After Scan)";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(784, 761);
+            ClientSize = new Size(784, 801);
+            Controls.Add(qualityLabel);
+            Controls.Add(qualityInput);
+            Controls.Add(label13);
             Controls.Add(scanImagePositionLabel);
             Controls.Add(nextScanButton);
             Controls.Add(previousScanButton);
@@ -499,6 +537,7 @@
             ((System.ComponentModel.ISupportInitialize)contrastInput).EndInit();
             ((System.ComponentModel.ISupportInitialize)portInput).EndInit();
             ((System.ComponentModel.ISupportInitialize)scanPicture).EndInit();
+            ((System.ComponentModel.ISupportInitialize)qualityInput).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -542,5 +581,8 @@
         private Button previousScanButton;
         private Button nextScanButton;
         private Label scanImagePositionLabel;
+        private Label qualityLabel;
+        private TrackBar qualityInput;
+        private Label label13;
     }
 }

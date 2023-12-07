@@ -19,6 +19,7 @@ namespace CobaScanner
             public int Resolution = 200;
             public int Brightness = 0;
             public int Contrast = 0;
+            public int Quality = 100;
 
             public int Port = 5678;
             public List<string> WhiteList = new List<string>();
@@ -34,6 +35,8 @@ namespace CobaScanner
         private Label BrightnessLabel;
         private TrackBar ContrastInput;
         private Label ContrastLabel;
+        private TrackBar QualityInput;
+        private Label QualityLabel;
 
         private NumericUpDown PortInput;
         private ListBox WhiteListBox;
@@ -44,6 +47,7 @@ namespace CobaScanner
             Form1 form1,
             ListBox scannerBox, ComboBox sourceBox, ComboBox paperBox, ComboBox colorBox, NumericUpDown resolutionInput,
             TrackBar brightnessInput, Label brightnessLabel, TrackBar contrastInput, Label contrastLabel,
+            TrackBar qualityInput, Label qualityLabel,
             NumericUpDown portInput, ListBox whiteListBox
             )
         {
@@ -56,6 +60,8 @@ namespace CobaScanner
             this.BrightnessLabel = brightnessLabel;
             this.ContrastInput = contrastInput;
             this.ContrastLabel = contrastLabel;
+            this.QualityInput = qualityInput;
+            this.QualityLabel = qualityLabel;
 
             this.PortInput = portInput;
             this.WhiteListBox = whiteListBox;
@@ -75,15 +81,16 @@ namespace CobaScanner
             {
                 JsonNode conf = JsonNode.Parse(File.ReadAllText(ConfigHelper.ConfigFileLocation))!;
                 ConfigHelper.Conf = new ConfigApp();
-                ConfigHelper.Conf.Scanner = (String)conf!["scanner"]!;
+                ConfigHelper.Conf.Scanner = (String)(conf!["scanner"]! ?? "");
 
-                ConfigHelper.Conf.Source = (int)conf!["source"]!;
-                ConfigHelper.Conf.Paper = (int)conf!["paper"]!;
-                ConfigHelper.Conf.Color = (int)conf!["color"]!;
+                ConfigHelper.Conf.Source = (int)(conf!["source"]! ?? 0);
+                ConfigHelper.Conf.Paper = (int)(conf!["paper"]! ?? 0);
+                ConfigHelper.Conf.Color = (int)(conf!["color"]! ?? 0);
 
-                ConfigHelper.Conf.Resolution = (int)conf!["resolution"]!;
-                ConfigHelper.Conf.Brightness = (int)conf!["brightness"]!;
-                ConfigHelper.Conf.Contrast = (int)conf!["contrast"]!;
+                ConfigHelper.Conf.Resolution = (int)(conf!["resolution"]! ?? 200);
+                ConfigHelper.Conf.Brightness = (int)(conf!["brightness"]! ?? 0);
+                ConfigHelper.Conf.Contrast = (int)(conf!["contrast"]! ?? 0);
+                ConfigHelper.Conf.Quality = (int)(conf!["quality"]! ?? 80);
 
                 ConfigHelper.Conf.Port = (int)conf!["port"]!;
                 ConfigHelper.Conf.WhiteList.Clear();
@@ -101,6 +108,8 @@ namespace CobaScanner
             this.BrightnessLabel.Text = ConfigHelper.Conf.Brightness.ToString();
             this.ContrastInput.Value = ConfigHelper.Conf.Contrast;
             this.ContrastLabel.Text = ConfigHelper.Conf.Contrast.ToString();
+            this.QualityInput.Value = ConfigHelper.Conf.Quality;
+            this.QualityLabel.Text = ConfigHelper.Conf.Quality.ToString();
 
             this.PortInput.Value = ConfigHelper.Conf.Port;
             this.WhiteListBox.Items.Clear();
@@ -131,6 +140,7 @@ namespace CobaScanner
             conf["resolution"] = ConfigHelper.Conf.Resolution;
             conf["brightness"] = ConfigHelper.Conf.Brightness;
             conf["contrast"] = ConfigHelper.Conf.Contrast;
+            conf["quality"] = ConfigHelper.Conf.Quality;
 
             conf["port"] = ConfigHelper.Conf.Port;
             JsonArray whiteLists = new JsonArray();
@@ -159,6 +169,7 @@ namespace CobaScanner
             ConfigHelper.Conf.Color = this.ColorBox.SelectedIndex;
             ConfigHelper.Conf.Brightness = this.BrightnessInput.Value;
             ConfigHelper.Conf.Contrast = this.ContrastInput.Value;
+            ConfigHelper.Conf.Quality = this.QualityInput.Value;
 
             ConfigHelper.Conf.Port = (int)this.PortInput.Value;
             this.SaveWhiteList();
