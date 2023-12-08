@@ -555,7 +555,7 @@ namespace CobaScanner
                         int pStatus = 0;
                         DoScanWorker.ReportProgress(16, "DTWAIN_AcquireNativeEx");
                         int AcquireCodeResult = 0;
-                        AcquireCodeResult = TwainAPI.DTWAIN_AcquireBufferedEx(
+                        AcquireCodeResult = TwainAPI.DTWAIN_AcquireNativeEx(
                             PtrSouce,
                             args.Color,
                             TwainAPI.DTWAIN_ACQUIREALL,
