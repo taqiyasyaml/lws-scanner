@@ -1,3 +1,4 @@
+using Sentry;
 using System.Configuration;
 namespace CobaScanner
 {
@@ -16,9 +17,11 @@ namespace CobaScanner
             Mutex AppMutex = new Mutex(true, ConfigurationManager.AppSettings["MutexID"], out MutexCreated);
             if(MutexCreated)
             {
+                DTWAINHelper.StartDTWAIN();
                 Application.Run(new Form1());
                 AppDomain.CurrentDomain.ProcessExit += (object? sender, EventArgs e) =>
                 {
+                    DTWAINHelper.StopDTWAIN();
                     AppMutex.ReleaseMutex();
                 };
             }
