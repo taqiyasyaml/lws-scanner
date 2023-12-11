@@ -63,6 +63,10 @@ namespace CobaScanner
         private Label brightnessLabel;
         private TrackBar contrastInput;
         private Label contrastLabel;
+        private NumericUpDown maxAcqInput;
+        private NumericUpDown maxPageInput;
+        private CheckBox sourceUICheckBox;
+        private CheckBox sourceIndicatorCheckBox;
         private TrackBar qualityInput;
         private Label qualityLabel;
         private Button stopScanButton;
@@ -113,6 +117,11 @@ namespace CobaScanner
             public int Resolution = 200;
             public int Brightness = 0;
             public int Contrast = 0;
+            public int MaxAcq = 0;
+            public int MaxPage = 0;
+            public bool SourceUI = false;
+            public bool SourceIndicator = false;
+            public bool SourceIndicatorEnable = false;
             public long Quality = 100;
         }
         private class ScannerProperties
@@ -120,6 +129,7 @@ namespace CobaScanner
             public string ProductName;
             public bool IsSupportFeeder;
             public bool IsSupportDuplex;
+            public bool IsSupportIndicator;
         }
         private class DoGetScanResult
         {
@@ -131,7 +141,9 @@ namespace CobaScanner
             PreviewScannedImages viewScanImages, ConfigHelper conf, Form1 form1,
             ListBox scannerBox, Label scannerLabel, 
             ComboBox sourceBox, ComboBox paperBox, ComboBox colorBox, 
-            NumericUpDown resolutionInput, TrackBar brightnessInput, Label brightnessLabel, TrackBar contrastInput, Label contrastLabel, TrackBar qualityInput, Label qualityLabel,
+            NumericUpDown resolutionInput, TrackBar brightnessInput, Label brightnessLabel, TrackBar contrastInput, Label contrastLabel,
+            NumericUpDown maxAcqInput, NumericUpDown maxPageInput, CheckBox sourceUiCheck, CheckBox sourceIndicatorCheck,
+            TrackBar qualityInput, Label qualityLabel,
             Button stopScanButton
         )
         {
@@ -149,6 +161,10 @@ namespace CobaScanner
             this.brightnessLabel = brightnessLabel;
             this.contrastInput = contrastInput;
             this.contrastLabel = contrastLabel;
+            this.maxAcqInput = maxAcqInput;
+            this.maxPageInput = maxPageInput;
+            this.sourceUICheckBox = sourceUiCheck;
+            this.sourceIndicatorCheckBox = sourceIndicatorCheck;
             this.qualityInput = qualityInput;
             this.qualityLabel = qualityLabel;
             this.stopScanButton = stopScanButton;
@@ -175,6 +191,10 @@ namespace CobaScanner
             brightnessLabel.Text = ConfigHelper.Conf.Brightness.ToString();
             contrastInput.Value = ConfigHelper.Conf.Contrast;
             contrastLabel.Text = ConfigHelper.Conf.Contrast.ToString();
+            maxAcqInput.Value = ConfigHelper.Conf.MaxAcq;
+            maxPageInput.Value = ConfigHelper.Conf.MaxPage;
+            sourceUICheckBox.Checked = ConfigHelper.Conf.SourceUI;
+            sourceIndicatorCheckBox.Checked = false;
             qualityInput.Value = ConfigHelper.Conf.Quality;
             qualityLabel.Text = ConfigHelper.Conf.Quality.ToString();
         }
@@ -209,6 +229,17 @@ namespace CobaScanner
                         sourceBox.SelectedIndex = ConfigHelper.Conf.Source;
                     }
                 }
+            }
+            sourceUICheckBox.Checked = false;
+            if (scanner.IsSupportIndicator)
+            {
+                sourceIndicatorCheckBox.Checked = true;
+                sourceIndicatorCheckBox.Enabled = true;
+            }
+            else
+            {
+                sourceIndicatorCheckBox.Checked = false;
+                sourceIndicatorCheckBox.Enabled = false;
             }
         }
 
@@ -305,6 +336,7 @@ namespace CobaScanner
                                         {
                                             result.SelectedScanner.IsSupportDuplex = false;
                                         }
+                                        result.SelectedScanner.IsSupportIndicator = TwainAPI.DTWAIN_IsIndicatorSupported(PtrSource) == 1;
                                         S.Restart();
                                         while (TwainAPI.DTWAIN_IsSourceOpen(PtrSource) == 1 && S.ElapsedMilliseconds < 5_000)
                                             TwainAPI.DTWAIN_CloseSource(PtrSource);
@@ -471,7 +503,7 @@ namespace CobaScanner
                     if (TwainAPI.DTWAIN_IsSourceOpen(PtrSouce) == 1)
                     {
                         //Source Setting
-                        DoSetScanWorker.ReportProgress(4, "DTWAIN_IsFeederDuplexSupported");
+                        DoSetScanWorker.ReportProgress(5, "DTWAIN_IsFeederDuplexSupported");
                         result = new ScannerProperties();
                         result.ProductName = args;
                         result.IsSupportFeeder = TwainAPI.DTWAIN_IsFeederSupported(PtrSouce) == 1;
@@ -483,6 +515,8 @@ namespace CobaScanner
                         {
                             result.IsSupportDuplex = false;
                         }
+                        DoSetScanWorker.ReportProgress(6, "DTWAIN_IsFeederDuplexSupported");
+                        result.IsSupportIndicator = TwainAPI.DTWAIN_IsIndicatorSupported(PtrSouce) == 1;
                         DoSetScanWorker.ReportProgress(97, "DTWAIN_CloseSource");
                         S.Restart();
                         while (TwainAPI.DTWAIN_IsSourceOpen(PtrSouce) == 1 && S.ElapsedMilliseconds < 5_000)
@@ -623,19 +657,27 @@ namespace CobaScanner
                 EncoderParams.Param[0] = EncodeParamQuality;
 
                 //END CONSTRUCT ENCODER
+                DTWAIN_HANDLE ThreadSession = IntPtr.Zero;
                 if(this.formStatus != null)
                 {
                     this.formStatus.Dispose();
                 }
-                this.formStatus = new Form2();
-                this.formStatus.Show();
-                this.formStatus.Invoke((MethodInvoker)delegate
+                if (args.SourceIndicator || args.SourceIndicatorEnable != true)
                 {
-                    this.formStatus.setStatus();
-                    this.formStatus.TopLevel = true;
-                    this.formStatus.TopMost = true;
-                });
-
+                    this.formStatus = new Form2();
+                    this.formStatus.Show();
+                    this.formStatus.Invoke((MethodInvoker)delegate
+                    {
+                        this.formStatus.setStatus();
+                        this.formStatus.TopLevel = true;
+                        this.formStatus.TopMost = true;
+                    });
+                    ThreadSession = this.formStatus.Handle;
+                }
+                else
+                {
+                    this.formStatus = null;
+                }
                 Stopwatch S = new Stopwatch();
                 int RetS = 0;
                 DoScanReportProgressInterceptor(1, "DTWAIN_StartThread");
@@ -646,7 +688,8 @@ namespace CobaScanner
                 if (RetS == 0)
                 {
                     DoScanReportProgressInterceptor(-1, "DTWAIN_StartThread_FAILED");
-                    this.formStatus.Dispose();
+                    if (this.formStatus != null)
+                        this.formStatus.Dispose();
                     this.formStatus = null;
                     return;
                 }
@@ -655,7 +698,7 @@ namespace CobaScanner
                 RetS = 0;
                 while (RetS == 0 && S.ElapsedMilliseconds < 5_000)
                     //StartTwainSession first argument parent window, second argument DLL file;
-                    RetS = TwainAPI.DTWAIN_StartTwainSession(this.formStatus.Handle, null);
+                    RetS = TwainAPI.DTWAIN_StartTwainSession(ThreadSession, null);
                 if (RetS == 0)
                 {
                     DoScanReportProgressInterceptor(-1, "DTWAIN_StartTwainSession_FAILED");
@@ -665,34 +708,35 @@ namespace CobaScanner
                         RetS = TwainAPI.DTWAIN_EndThread(DTWAINHelper.DTWAINThread);
                     if (RetS == 0)
                         DoScanReportProgressInterceptor(-1, "DTWAIN_EndThread_FAILED");
-                    this.formStatus.Dispose();
+                    if (this.formStatus != null)
+                        this.formStatus.Dispose();
                     this.formStatus = null;
                     return;
                 }
                 DTWAINHelper.IsDTWAINBusy = true;
                 DTWAINHelper.KeepScanning = true;
-                DoScanReportProgressInterceptor(2, "DTWAIN_SetCallback");
+                DoScanReportProgressInterceptor(3, "DTWAIN_SetCallback");
                 TwainAPI.DTWAIN_EnableMsgNotify(1);
                 TwainAPI.DTWAIN_SetCallback(this.AcquireCallback, 0);
 
-                DoScanReportProgressInterceptor(3, "DTWAIN_SelectSourceByName");
+                DoScanReportProgressInterceptor(4, "DTWAIN_SelectSourceByName");
                 DTWAIN_SOURCE PtrSouce = TwainAPI.DTWAIN_SelectSourceByName(CurrentSelectedScanner);
 
                 if (PtrSouce != IntPtr.Zero)
                 {
-                    DoScanReportProgressInterceptor(4, "DTWAIN_OpenSource");
+                    DoScanReportProgressInterceptor(5, "DTWAIN_OpenSource");
                     S.Restart();
                     while(TwainAPI.DTWAIN_IsSourceOpen(PtrSouce) == 0 && S.ElapsedMilliseconds < 5_000)
                         TwainAPI.DTWAIN_OpenSource(PtrSouce);
                     if (TwainAPI.DTWAIN_IsSourceOpen(PtrSouce) == 1)
                     {
                         //Source Setting
-                        /*DoScanWorker.ReportProgress(5, "DTWAIN_IsIndicatorSupported");
+                        DoScanWorker.ReportProgress(5, "DTWAIN_IsIndicatorSupported");
                         if (TwainAPI.DTWAIN_IsIndicatorSupported(PtrSouce) == 1)
                         {
                             DoScanWorker.ReportProgress(6, "DTWAIN_EnableIndicator");
-                            TwainAPI.DTWAIN_EnableIndicator(PtrSouce, 1);
-                        }*/
+                            TwainAPI.DTWAIN_EnableIndicator(PtrSouce, args.SourceIndicator ? 1 : 0);
+                        }
                         DoScanReportProgressInterceptor(7, "DTWAIN_IsFeederDuplexSupported");
                         if (TwainAPI.DTWAIN_IsFeederSupported(PtrSouce) == 1)
                         {
@@ -721,31 +765,34 @@ namespace CobaScanner
                                 }
                             }
                         }
-                        //Paper Setting
+                        //Max Acq
                         DoScanReportProgressInterceptor(11, "DTWAIN_SetPaperSize");
+                        TwainAPI.DTWAIN_SetMaxAcquisitions(PtrSouce, args.MaxAcq > 0 ? args.MaxAcq : TwainAPI.DTWAIN_MAXACQUIRE);
+                        //Paper
+                        DoScanReportProgressInterceptor(12, "DTWAIN_SetPaperSize");
                         TwainAPI.DTWAIN_SetPaperSize(PtrSouce, args.Paper, args.Paper == 0 ? 0 : 1);
                         //Resolution
-                        DoScanReportProgressInterceptor(12, "DTWAIN_SetResolution");
+                        DoScanReportProgressInterceptor(13, "DTWAIN_SetResolution");
                         TwainAPI.DTWAIN_SetResolution(PtrSouce, args.Resolution);
                         //Brightness
-                        DoScanReportProgressInterceptor(13, "DTWAIN_SetBrightness");
+                        DoScanReportProgressInterceptor(14, "DTWAIN_SetBrightness");
                         TwainAPI.DTWAIN_SetBrightness(PtrSouce, args.Brightness);
                         //Contrast
-                        DoScanReportProgressInterceptor(14, "DTWAIN_SetContrast");
+                        DoScanReportProgressInterceptor(15, "DTWAIN_SetContrast");
                         TwainAPI.DTWAIN_SetContrast(PtrSouce, args.Contrast);
 
                         //Acquisition Array
                         //Inside Acquistion Array are DIB Array
-                        DoScanReportProgressInterceptor(15, "DTWAIN_CreateAcquisitionArray");
+                        DoScanReportProgressInterceptor(16, "DTWAIN_CreateAcquisitionArray");
                         DTWAIN_ARRAY AcqArray = TwainAPI.DTWAIN_CreateAcquisitionArray();
                         int pStatus = 0;
-                        DoScanReportProgressInterceptor(16, "DTWAIN_AcquireNativeEx");
+                        DoScanReportProgressInterceptor(17, "DTWAIN_AcquireNativeEx");
                         int AcquireCodeResult = 0;
                         AcquireCodeResult = TwainAPI.DTWAIN_AcquireNativeEx(
                             PtrSouce,
                             args.Color,
-                            TwainAPI.DTWAIN_ACQUIREALL,
-                            0,
+                            args.MaxPage == 0 ? TwainAPI.DTWAIN_ACQUIREALL : args.MaxPage,
+                            args.SourceUI ? 1 : 0,
                             0,
                             AcqArray,
                             ref pStatus
@@ -824,7 +871,8 @@ namespace CobaScanner
                     DoScanReportProgressInterceptor(-1, "DTWAIN_EndThread_FAILED");
                 DTWAINHelper.IsDTWAINBusy = false;
                 DTWAINHelper.KeepScanning = false;
-                this.formStatus.Dispose();
+                if (this.formStatus != null)
+                    this.formStatus.Dispose();
                 this.formStatus = null;
                 e.Result = result.ToJsonString();
             };
@@ -924,9 +972,14 @@ namespace CobaScanner
                 args.Source = this.sourceBox.SelectedIndex;
                 args.Paper = PaperInts[this.paperBox.SelectedIndex];
                 args.Color = ColorInts[this.colorBox.SelectedIndex];
-                args.Resolution = int.Parse(this.resolutionInput.Value.ToString());
+                args.Resolution = (int)this.resolutionInput.Value;
                 args.Brightness = this.brightnessInput.Value;
                 args.Contrast = this.contrastInput.Value;
+                args.MaxAcq = (int)this.maxAcqInput.Value;
+                args.MaxPage = (int)this.maxPageInput.Value;
+                args.SourceUI = this.sourceUICheckBox.Checked;
+                args.SourceIndicator = this.sourceIndicatorCheckBox.Checked;
+                args.SourceIndicatorEnable = this.sourceIndicatorCheckBox.Enabled;
                 args.Quality = this.qualityInput.Value;
             });
             return args;

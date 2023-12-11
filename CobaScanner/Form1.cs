@@ -30,6 +30,12 @@ namespace CobaScanner
             brightnessLabel.Text = "0";
             contrastInput.Value = 0;
             contrastLabel.Text = "0";
+            maxAcq.Value = 0;
+            maxPage.Value = 0;
+            sourceUiCheck.Checked = false;
+            sourceIndicatorCheck.Checked = false;
+            qualityInput.Value = 100;
+            qualityLabel.Text = "100";
         }
 
         private void brightnessInput_Scroll(object sender, EventArgs e)
@@ -82,9 +88,9 @@ namespace CobaScanner
                 this.ShowInTaskbar = false;
                 this.Hide();
             }
-            configHelper = new ConfigHelper(this, scannerBox, sourceBox, paperBox, colorBox, resolutionInput, brightnessInput, brightnessLabel, contrastInput, contrastLabel, qualityInput, qualityLabel, portInput, whiteListBox);
+            configHelper = new ConfigHelper(this, scannerBox, sourceBox, paperBox, colorBox, resolutionInput, brightnessInput, brightnessLabel, contrastInput, contrastLabel, maxAcq, maxPage, sourceUiCheck, sourceIndicatorCheck, qualityInput, qualityLabel, portInput, whiteListBox);
             scannedImages = new PreviewScannedImages(this, this.scanPicture, this.nextScanButton, this.previousScanButton, this.scanImagePositionLabel);
-            DtwainHelper = new DTWAINHelper(scannedImages, configHelper, this, scannerBox, scannerLabel, sourceBox, paperBox, colorBox, resolutionInput, brightnessInput, brightnessLabel, contrastInput, contrastLabel, qualityInput, qualityLabel, stopScanButton);
+            DtwainHelper = new DTWAINHelper(scannedImages, configHelper, this, scannerBox, scannerLabel, sourceBox, paperBox, colorBox, resolutionInput, brightnessInput, brightnessLabel, contrastInput, contrastLabel, maxAcq, maxPage, sourceUiCheck, sourceIndicatorCheck, qualityInput, qualityLabel, stopScanButton);
             webSocketHelper = new WebSocketHelper(configHelper, this, this.portInput, this.startStopWSButton, this.whiteListBox, DtwainHelper);
             DtwainHelper.DoGetScannerList();
             webSocketHelper.StartWS();

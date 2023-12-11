@@ -70,12 +70,20 @@
             qualityLabel = new Label();
             qualityInput = new TrackBar();
             label13 = new Label();
+            label12 = new Label();
+            maxAcq = new NumericUpDown();
+            label14 = new Label();
+            maxPage = new NumericUpDown();
+            sourceUiCheck = new CheckBox();
+            sourceIndicatorCheck = new CheckBox();
             ((System.ComponentModel.ISupportInitialize)resolutionInput).BeginInit();
             ((System.ComponentModel.ISupportInitialize)brightnessInput).BeginInit();
             ((System.ComponentModel.ISupportInitialize)contrastInput).BeginInit();
             ((System.ComponentModel.ISupportInitialize)portInput).BeginInit();
             ((System.ComponentModel.ISupportInitialize)scanPicture).BeginInit();
             ((System.ComponentModel.ISupportInitialize)qualityInput).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)maxAcq).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)maxPage).BeginInit();
             SuspendLayout();
             // 
             // label1
@@ -183,9 +191,11 @@
             resolutionInput.Increment = new decimal(new int[] { 100, 0, 0, 0 });
             resolutionInput.Location = new Point(250, 364);
             resolutionInput.Maximum = new decimal(new int[] { 12800, 0, 0, 0 });
+            resolutionInput.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             resolutionInput.Name = "resolutionInput";
             resolutionInput.Size = new Size(120, 23);
             resolutionInput.TabIndex = 11;
+            resolutionInput.Value = new decimal(new int[] { 200, 0, 0, 0 });
             // 
             // label5
             // 
@@ -263,7 +273,7 @@
             // 
             // startScanButton
             // 
-            startScanButton.Location = new Point(135, 525);
+            startScanButton.Location = new Point(135, 630);
             startScanButton.Name = "startScanButton";
             startScanButton.Size = new Size(110, 23);
             startScanButton.TabIndex = 19;
@@ -280,7 +290,7 @@
             // 
             // resetSettingButton
             // 
-            resetSettingButton.Location = new Point(10, 525);
+            resetSettingButton.Location = new Point(10, 630);
             resetSettingButton.Name = "resetSettingButton";
             resetSettingButton.Size = new Size(110, 23);
             resetSettingButton.TabIndex = 18;
@@ -291,7 +301,7 @@
             // stopScanButton
             // 
             stopScanButton.Enabled = false;
-            stopScanButton.Location = new Point(260, 525);
+            stopScanButton.Location = new Point(260, 630);
             stopScanButton.Name = "stopScanButton";
             stopScanButton.Size = new Size(110, 23);
             stopScanButton.TabIndex = 20;
@@ -303,7 +313,7 @@
             // 
             label7.AutoSize = true;
             label7.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
-            label7.Location = new Point(10, 560);
+            label7.Location = new Point(400, 660);
             label7.Name = "label7";
             label7.Size = new Size(99, 15);
             label7.TabIndex = 21;
@@ -311,7 +321,7 @@
             // 
             // portInput
             // 
-            portInput.Location = new Point(135, 560);
+            portInput.Location = new Point(525, 660);
             portInput.Maximum = new decimal(new int[] { 65535, 0, 0, 0 });
             portInput.Minimum = new decimal(new int[] { 1, 0, 0, 0 });
             portInput.Name = "portInput";
@@ -321,7 +331,7 @@
             // 
             // startStopWSButton
             // 
-            startStopWSButton.Location = new Point(260, 560);
+            startStopWSButton.Location = new Point(650, 660);
             startStopWSButton.Name = "startStopWSButton";
             startStopWSButton.Size = new Size(110, 23);
             startStopWSButton.TabIndex = 23;
@@ -333,16 +343,16 @@
             // 
             whiteListBox.FormattingEnabled = true;
             whiteListBox.ItemHeight = 15;
-            whiteListBox.Location = new Point(10, 620);
+            whiteListBox.Location = new Point(400, 720);
             whiteListBox.Name = "whiteListBox";
-            whiteListBox.Size = new Size(360, 94);
+            whiteListBox.Size = new Size(360, 79);
             whiteListBox.TabIndex = 25;
             // 
             // label9
             // 
             label9.AutoSize = true;
             label9.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
-            label9.Location = new Point(10, 590);
+            label9.Location = new Point(400, 690);
             label9.Name = "label9";
             label9.Size = new Size(111, 15);
             label9.TabIndex = 24;
@@ -350,7 +360,7 @@
             // 
             // deleteWhiteList
             // 
-            deleteWhiteList.Location = new Point(260, 590);
+            deleteWhiteList.Location = new Point(650, 690);
             deleteWhiteList.Name = "deleteWhiteList";
             deleteWhiteList.Size = new Size(110, 23);
             deleteWhiteList.TabIndex = 26;
@@ -391,9 +401,9 @@
             // label10
             // 
             label10.ForeColor = SystemColors.ControlDarkDark;
-            label10.Location = new Point(410, 740);
+            label10.Location = new Point(12, 800);
             label10.Name = "label10";
-            label10.Size = new Size(360, 50);
+            label10.Size = new Size(748, 50);
             label10.TabIndex = 30;
             label10.Text = "Listyawan WebSocket Scanner 2023\r\nMade with love by <taqiyasyaml@gmail.com>\r\nThis app use .NET, dynarithmic.com DLL, and Fleck DLL";
             label10.TextAlign = ContentAlignment.MiddleCenter;
@@ -453,7 +463,7 @@
             // 
             qualityLabel.AutoSize = true;
             qualityLabel.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            qualityLabel.Location = new Point(10, 500);
+            qualityLabel.Location = new Point(10, 600);
             qualityLabel.Name = "qualityLabel";
             qualityLabel.Size = new Size(13, 15);
             qualityLabel.TabIndex = 38;
@@ -461,7 +471,7 @@
             // 
             // qualityInput
             // 
-            qualityInput.Location = new Point(120, 485);
+            qualityInput.Location = new Point(120, 585);
             qualityInput.Maximum = 100;
             qualityInput.Name = "qualityInput";
             qualityInput.Size = new Size(250, 45);
@@ -474,17 +484,77 @@
             // 
             label13.AutoSize = true;
             label13.Font = new Font("Segoe UI", 8F, FontStyle.Bold, GraphicsUnit.Point);
-            label13.Location = new Point(10, 485);
+            label13.Location = new Point(10, 585);
             label13.Name = "label13";
             label13.Size = new Size(108, 13);
             label13.TabIndex = 36;
             label13.Text = "Quality (After Scan)";
             // 
+            // label12
+            // 
+            label12.AutoSize = true;
+            label12.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            label12.Location = new Point(10, 480);
+            label12.Name = "label12";
+            label12.Size = new Size(166, 15);
+            label12.TabIndex = 39;
+            label12.Text = "Max Acquistion (0 is Default)";
+            // 
+            // maxAcq
+            // 
+            maxAcq.Location = new Point(250, 475);
+            maxAcq.Name = "maxAcq";
+            maxAcq.Size = new Size(120, 23);
+            maxAcq.TabIndex = 40;
+            // 
+            // label14
+            // 
+            label14.AutoSize = true;
+            label14.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point);
+            label14.Location = new Point(10, 510);
+            label14.Name = "label14";
+            label14.Size = new Size(135, 15);
+            label14.TabIndex = 41;
+            label14.Text = "Max Page (0 is Default)";
+            // 
+            // maxPage
+            // 
+            maxPage.Location = new Point(250, 505);
+            maxPage.Name = "maxPage";
+            maxPage.Size = new Size(120, 23);
+            maxPage.TabIndex = 42;
+            // 
+            // sourceUiCheck
+            // 
+            sourceUiCheck.AutoSize = true;
+            sourceUiCheck.Location = new Point(10, 535);
+            sourceUiCheck.Name = "sourceUiCheck";
+            sourceUiCheck.Size = new Size(166, 19);
+            sourceUiCheck.TabIndex = 43;
+            sourceUiCheck.Text = "Show Driver UI Acquisition";
+            sourceUiCheck.UseVisualStyleBackColor = true;
+            // 
+            // sourceIndicatorCheck
+            // 
+            sourceIndicatorCheck.AutoSize = true;
+            sourceIndicatorCheck.Location = new Point(10, 560);
+            sourceIndicatorCheck.Name = "sourceIndicatorCheck";
+            sourceIndicatorCheck.Size = new Size(139, 19);
+            sourceIndicatorCheck.TabIndex = 44;
+            sourceIndicatorCheck.Text = "Show Driver Indicator";
+            sourceIndicatorCheck.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(784, 801);
+            ClientSize = new Size(784, 861);
+            Controls.Add(sourceIndicatorCheck);
+            Controls.Add(sourceUiCheck);
+            Controls.Add(label14);
+            Controls.Add(maxPage);
+            Controls.Add(label12);
+            Controls.Add(maxAcq);
             Controls.Add(qualityLabel);
             Controls.Add(qualityInput);
             Controls.Add(label13);
@@ -538,6 +608,8 @@
             ((System.ComponentModel.ISupportInitialize)portInput).EndInit();
             ((System.ComponentModel.ISupportInitialize)scanPicture).EndInit();
             ((System.ComponentModel.ISupportInitialize)qualityInput).EndInit();
+            ((System.ComponentModel.ISupportInitialize)maxAcq).EndInit();
+            ((System.ComponentModel.ISupportInitialize)maxPage).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -584,5 +656,11 @@
         private Label qualityLabel;
         private TrackBar qualityInput;
         private Label label13;
+        private Label label12;
+        private NumericUpDown maxAcq;
+        private Label label14;
+        private NumericUpDown maxPage;
+        private CheckBox sourceUiCheck;
+        private CheckBox sourceIndicatorCheck;
     }
 }

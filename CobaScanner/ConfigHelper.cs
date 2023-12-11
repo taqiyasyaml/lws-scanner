@@ -19,6 +19,12 @@ namespace CobaScanner
             public int Resolution = 200;
             public int Brightness = 0;
             public int Contrast = 0;
+
+            public int MaxAcq = 0;
+            public int MaxPage = 0;
+            public bool SourceUI = false;
+            public bool SourceIndicator = false;
+
             public int Quality = 100;
 
             public int Port = 5678;
@@ -35,6 +41,10 @@ namespace CobaScanner
         private Label BrightnessLabel;
         private TrackBar ContrastInput;
         private Label ContrastLabel;
+        private NumericUpDown MaxAcqInput;
+        private NumericUpDown MaxPageInput;
+        private CheckBox SourceUICheckBox;
+        private CheckBox SourceIndicatorCheckBox;
         private TrackBar QualityInput;
         private Label QualityLabel;
 
@@ -47,6 +57,7 @@ namespace CobaScanner
             Form1 form1,
             ListBox scannerBox, ComboBox sourceBox, ComboBox paperBox, ComboBox colorBox, NumericUpDown resolutionInput,
             TrackBar brightnessInput, Label brightnessLabel, TrackBar contrastInput, Label contrastLabel,
+            NumericUpDown maxAcqInput, NumericUpDown maxPageInput, CheckBox sourceUiCheck, CheckBox sourceIndicatorCheck,
             TrackBar qualityInput, Label qualityLabel,
             NumericUpDown portInput, ListBox whiteListBox
             )
@@ -60,6 +71,10 @@ namespace CobaScanner
             this.BrightnessLabel = brightnessLabel;
             this.ContrastInput = contrastInput;
             this.ContrastLabel = contrastLabel;
+            this.MaxAcqInput = maxAcqInput;
+            this.MaxPageInput = maxPageInput;
+            this.SourceUICheckBox = sourceUiCheck;
+            this.SourceIndicatorCheckBox = sourceIndicatorCheck;
             this.QualityInput = qualityInput;
             this.QualityLabel = qualityLabel;
 
@@ -90,6 +105,10 @@ namespace CobaScanner
                 ConfigHelper.Conf.Resolution = (int)(conf!["resolution"]! ?? 200);
                 ConfigHelper.Conf.Brightness = (int)(conf!["brightness"]! ?? 0);
                 ConfigHelper.Conf.Contrast = (int)(conf!["contrast"]! ?? 0);
+                ConfigHelper.Conf.MaxAcq = (int)(conf!["max_acq"]! ?? 0);
+                ConfigHelper.Conf.MaxPage = (int)(conf!["max_page"]! ?? 0);
+                ConfigHelper.Conf.SourceUI = (bool)(conf!["source_ui"]! ?? false);
+                ConfigHelper.Conf.SourceIndicator = (bool)(conf!["source_indicator"]! ?? false);
                 ConfigHelper.Conf.Quality = (int)(conf!["quality"]! ?? 80);
 
                 ConfigHelper.Conf.Port = (int)conf!["port"]!;
@@ -108,6 +127,10 @@ namespace CobaScanner
             this.BrightnessLabel.Text = ConfigHelper.Conf.Brightness.ToString();
             this.ContrastInput.Value = ConfigHelper.Conf.Contrast;
             this.ContrastLabel.Text = ConfigHelper.Conf.Contrast.ToString();
+            this.MaxAcqInput.Value = ConfigHelper.Conf.MaxAcq;
+            this.MaxPageInput.Value = ConfigHelper.Conf.MaxPage;
+            this.SourceUICheckBox.Checked = ConfigHelper.Conf.SourceUI;
+            this.SourceIndicatorCheckBox.Checked = ConfigHelper.Conf.SourceIndicator;
             this.QualityInput.Value = ConfigHelper.Conf.Quality;
             this.QualityLabel.Text = ConfigHelper.Conf.Quality.ToString();
 
@@ -140,6 +163,10 @@ namespace CobaScanner
             conf["resolution"] = ConfigHelper.Conf.Resolution;
             conf["brightness"] = ConfigHelper.Conf.Brightness;
             conf["contrast"] = ConfigHelper.Conf.Contrast;
+            conf["max_acq"] = ConfigHelper.Conf.MaxAcq;
+            conf["max_page"] = ConfigHelper.Conf.MaxPage;
+            conf["source_ui"] = ConfigHelper.Conf.SourceUI;
+            conf["source_indicator"] = ConfigHelper.Conf.SourceIndicator;
             conf["quality"] = ConfigHelper.Conf.Quality;
 
             conf["port"] = ConfigHelper.Conf.Port;
@@ -169,6 +196,10 @@ namespace CobaScanner
             ConfigHelper.Conf.Color = this.ColorBox.SelectedIndex;
             ConfigHelper.Conf.Brightness = this.BrightnessInput.Value;
             ConfigHelper.Conf.Contrast = this.ContrastInput.Value;
+            ConfigHelper.Conf.MaxAcq = (int)this.MaxAcqInput.Value;
+            ConfigHelper.Conf.MaxPage = (int)this.MaxPageInput.Value;
+            ConfigHelper.Conf.SourceUI = this.SourceUICheckBox.Checked;
+            ConfigHelper.Conf.SourceIndicator = this.SourceIndicatorCheckBox.Checked;
             ConfigHelper.Conf.Quality = this.QualityInput.Value;
 
             ConfigHelper.Conf.Port = (int)this.PortInput.Value;
