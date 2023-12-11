@@ -52,6 +52,7 @@ namespace CobaScanner
         private ConfigHelper Conf;
 
         private Form1 form1;
+        private Form2? formStatus = null;
         private ListBox scannerBox;
         private Label scannerLabel;
         private ComboBox sourceBox;
@@ -127,7 +128,7 @@ namespace CobaScanner
         }
 
         public DTWAINHelper(
-            PreviewScannedImages viewScanImages, ConfigHelper conf, Form1 form1, 
+            PreviewScannedImages viewScanImages, ConfigHelper conf, Form1 form1,
             ListBox scannerBox, Label scannerLabel, 
             ComboBox sourceBox, ComboBox paperBox, ComboBox colorBox, 
             NumericUpDown resolutionInput, TrackBar brightnessInput, Label brightnessLabel, TrackBar contrastInput, Label contrastLabel, TrackBar qualityInput, Label qualityLabel,
@@ -521,24 +522,35 @@ namespace CobaScanner
                 EncoderParams.Param[0] = EncodeParamQuality;
 
                 //END CONSTRUCT ENCODER
-
-                DoScanWorker.ReportProgress(1, "DTWAIN_StartThread");
+                if(this.formStatus != null)
+                {
+                    this.formStatus.Dispose();
+                }
+                this.formStatus = new Form2();
+                this.formStatus.Show();
+                this.formStatus.Invoke((MethodInvoker)delegate
+                {
+                    this.formStatus.setStatus();
+                    this.formStatus.TopLevel = true;
+                    this.formStatus.TopMost = true;
+                });
+                DoScanReportProgressInterceptor(1, "DTWAIN_StartThread");
                 TwainAPI.DTWAIN_StartThread(DTWAINHelper.DTWAINThread);
-                DoScanWorker.ReportProgress(2, "DTWAIN_StartTwainSession");
+                DoScanReportProgressInterceptor(2, "DTWAIN_StartTwainSession");
                 //StartTwainSession first argument parent window, second argument DLL file;
-                TwainAPI.DTWAIN_StartTwainSession(IntPtr.Zero, null);
+                TwainAPI.DTWAIN_StartTwainSession(this.formStatus.Handle, null);
                 DTWAINHelper.IsDTWAINBusy = true;
                 DTWAINHelper.KeepScanning = true;
-                DoScanWorker.ReportProgress(2, "DTWAIN_SetCallback");
+                DoScanReportProgressInterceptor(2, "DTWAIN_SetCallback");
                 TwainAPI.DTWAIN_EnableMsgNotify(1);
                 TwainAPI.DTWAIN_SetCallback(this.AcquireCallback, 0);
 
-                DoScanWorker.ReportProgress(3, "DTWAIN_SelectSourceByName");
+                DoScanReportProgressInterceptor(3, "DTWAIN_SelectSourceByName");
                 DTWAIN_SOURCE PtrSouce = TwainAPI.DTWAIN_SelectSourceByName(CurrentSelectedScanner);
 
                 if (PtrSouce != IntPtr.Zero)
                 {
-                    DoScanWorker.ReportProgress(4, "DTWAIN_OpenSource");
+                    DoScanReportProgressInterceptor(4, "DTWAIN_OpenSource");
                     if (TwainAPI.DTWAIN_OpenSource(PtrSouce) == 1)
                     {
                         //Source Setting
@@ -548,53 +560,53 @@ namespace CobaScanner
                             DoScanWorker.ReportProgress(6, "DTWAIN_EnableIndicator");
                             TwainAPI.DTWAIN_EnableIndicator(PtrSouce, 1);
                         }*/
-                        DoScanWorker.ReportProgress(7, "DTWAIN_IsFeederDuplexSupported");
+                        DoScanReportProgressInterceptor(7, "DTWAIN_IsFeederDuplexSupported");
                         if (TwainAPI.DTWAIN_IsFeederSupported(PtrSouce) == 1)
                         {
-                            DoScanWorker.ReportProgress(8, "DTWAIN_IsFeederLoaded");
+                            DoScanReportProgressInterceptor(8, "DTWAIN_IsFeederLoaded");
                             if (args.Source == 0 || TwainAPI.DTWAIN_IsFeederLoaded(PtrSouce) == 0)
                             {
-                                DoScanWorker.ReportProgress(9, "DTWAIN_EnableFeeder0");
+                                DoScanReportProgressInterceptor(9, "DTWAIN_EnableFeeder0");
                                 TwainAPI.DTWAIN_EnableFeeder(PtrSouce, 0);
                             }
                             else
                             {
-                                DoScanWorker.ReportProgress(9, "DTWAIN_EnableFeeder1");
+                                DoScanReportProgressInterceptor(9, "DTWAIN_EnableFeeder1");
                                 TwainAPI.DTWAIN_EnableFeeder(PtrSouce, 1);
                                 if (TwainAPI.DTWAIN_IsDuplexSupported(PtrSouce) == 1)
                                 {
                                     if (args.Source == 2)
                                     {
-                                        DoScanWorker.ReportProgress(10, "DTWAIN_EnableDuplex1");
+                                        DoScanReportProgressInterceptor(10, "DTWAIN_EnableDuplex1");
                                         TwainAPI.DTWAIN_EnableDuplex(PtrSouce, 1);
                                     }
                                     else
                                     {
-                                        DoScanWorker.ReportProgress(10, "DTWAIN_EnableDuplex0");
+                                        DoScanReportProgressInterceptor(10, "DTWAIN_EnableDuplex0");
                                         TwainAPI.DTWAIN_EnableDuplex(PtrSouce, 0);
                                     }
                                 }
                             }
                         }
                         //Paper Setting
-                        DoScanWorker.ReportProgress(11, "DTWAIN_SetPaperSize");
+                        DoScanReportProgressInterceptor(11, "DTWAIN_SetPaperSize");
                         TwainAPI.DTWAIN_SetPaperSize(PtrSouce, args.Paper, args.Paper == 0 ? 0 : 1);
                         //Resolution
-                        DoScanWorker.ReportProgress(12, "DTWAIN_SetResolution");
+                        DoScanReportProgressInterceptor(12, "DTWAIN_SetResolution");
                         TwainAPI.DTWAIN_SetResolution(PtrSouce, args.Resolution);
                         //Brightness
-                        DoScanWorker.ReportProgress(13, "DTWAIN_SetBrightness");
+                        DoScanReportProgressInterceptor(13, "DTWAIN_SetBrightness");
                         TwainAPI.DTWAIN_SetBrightness(PtrSouce, args.Brightness);
                         //Contrast
-                        DoScanWorker.ReportProgress(14, "DTWAIN_SetContrast");
+                        DoScanReportProgressInterceptor(14, "DTWAIN_SetContrast");
                         TwainAPI.DTWAIN_SetContrast(PtrSouce, args.Contrast);
 
                         //Acquisition Array
                         //Inside Acquistion Array are DIB Array
-                        DoScanWorker.ReportProgress(15, "DTWAIN_CreateAcquisitionArray");
+                        DoScanReportProgressInterceptor(15, "DTWAIN_CreateAcquisitionArray");
                         DTWAIN_ARRAY AcqArray = TwainAPI.DTWAIN_CreateAcquisitionArray();
                         int pStatus = 0;
-                        DoScanWorker.ReportProgress(16, "DTWAIN_AcquireNativeEx");
+                        DoScanReportProgressInterceptor(16, "DTWAIN_AcquireNativeEx");
                         int AcquireCodeResult = 0;
                         AcquireCodeResult = TwainAPI.DTWAIN_AcquireNativeEx(
                             PtrSouce,
@@ -613,13 +625,13 @@ namespace CobaScanner
                             JsonArray JAcq = new JsonArray();
                             for (int IAcq = 0; IAcq < CountAcq; IAcq++)
                             {
-                                DoScanWorker.ReportProgress(20 + IAcq * PercentEachAcq, "PROCESS_ACQ");
+                                DoScanReportProgressInterceptor(20 + IAcq * PercentEachAcq, "PROCESS_ACQ");
                                 int CountDib = TwainAPI.DTWAIN_GetNumAcquiredImages(AcqArray, IAcq);
                                 int PercentEachDib = PercentEachAcq / CountDib;
                                 JsonArray JDib = new JsonArray();
                                 for (int IDib = 0; IDib < CountDib; IDib++)
                                 {
-                                    DoScanWorker.ReportProgress(20 + IAcq * PercentEachAcq + IDib * PercentEachDib, "PROCESS_DIB");
+                                    DoScanReportProgressInterceptor(20 + IAcq * PercentEachAcq + IDib * PercentEachDib, "PROCESS_DIB");
                                     DTWAIN_HANDLE PtrDib = TwainAPI.DTWAIN_GetAcquiredImage(AcqArray, IAcq, IDib);
                                     Bitmap BmpScan = Bitmap.FromHbitmap(TwainAPI.DTWAIN_ConvertDIBToBitmap(PtrDib, IntPtr.Zero));
                                     MemoryStream StreamScan = new MemoryStream();
@@ -636,30 +648,32 @@ namespace CobaScanner
                         }
                         else
                         {
-                            DoScanWorker.ReportProgress(-1, "ACQ_FAILED");
+                            DoScanReportProgressInterceptor(-1, "ACQ_FAILED");
                         }
 
-                        DoScanWorker.ReportProgress(96, "DTWAIN_DestroyAcquisitionArray");
+                        DoScanReportProgressInterceptor(96, "DTWAIN_DestroyAcquisitionArray");
                         TwainAPI.DTWAIN_DestroyAcquisitionArray(AcqArray, 1);
-                        DoScanWorker.ReportProgress(97, "DTWAIN_CloseSource");
+                        DoScanReportProgressInterceptor(97, "DTWAIN_CloseSource");
                         TwainAPI.DTWAIN_CloseSource(PtrSouce);
                     }
                     else
                     {
-                        DoScanWorker.ReportProgress(-1, "SCANNER_NOT_OPENED");
+                        DoScanReportProgressInterceptor(-1, "SCANNER_NOT_OPENED");
                     }
                 }
                 else
                 {
-                    DoScanWorker.ReportProgress(-1, "SCANNER_NOT_FOUND");
+                    DoScanReportProgressInterceptor(-1, "SCANNER_NOT_FOUND");
                 }
 
-                DoScanWorker.ReportProgress(98, "DTWAIN_EndTwainSession");
+                DoScanReportProgressInterceptor(98, "DTWAIN_EndTwainSession");
                 TwainAPI.DTWAIN_EndTwainSession();
-                DoScanWorker.ReportProgress(99, "DTWAIN_EndThread");
+                DoScanReportProgressInterceptor(99, "DTWAIN_EndThread");
                 TwainAPI.DTWAIN_EndThread(DTWAINHelper.DTWAINThread);
                 DTWAINHelper.IsDTWAINBusy = false;
                 DTWAINHelper.KeepScanning = false;
+                this.formStatus.Dispose();
+                this.formStatus = null;
                 e.Result = result.ToJsonString();
             };
             DoScanWorker.ProgressChanged += (object sender, ProgressChangedEventArgs e) =>
@@ -734,6 +748,20 @@ namespace CobaScanner
                     socket = null;
                 }
             };
+        }
+        private void DoScanReportProgressInterceptor(int ProgressPercentage, String code)
+        {
+            if (DoScanWorker.IsBusy)
+            {
+                DoScanWorker.ReportProgress(ProgressPercentage, code);
+            }
+            if (this.formStatus != null && this.formStatus.IsHandleCreated && this.formStatus.Visible)
+            {
+                this.formStatus.Invoke((MethodInvoker)delegate
+                {
+                    this.formStatus.setStatus(DTWAINHelper.SelectedScanner + " (" + ProgressPercentage.ToString() + "% " + code + ")");
+                });
+            }
         }
 
         private DoScanArguments GetScanArguments()
