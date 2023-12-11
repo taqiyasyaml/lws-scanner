@@ -233,11 +233,35 @@ namespace CobaScanner
                     DoGetScanWorker.ReportProgress(-1, "DTWAIN_NOT_FOUND");
                     return;
                 }
+                Stopwatch S = new Stopwatch();
+                int RetS = 0;
                 DoGetScanWorker.ReportProgress(1, "DTWAIN_StartThread");
-                TwainAPI.DTWAIN_StartThread(DTWAINHelper.DTWAINThread);
+                S.Restart();
+                RetS = 0;
+                while (RetS == 0 && S.ElapsedMilliseconds < 5_000)
+                    RetS = TwainAPI.DTWAIN_StartThread(DTWAINHelper.DTWAINThread);
+                if (RetS == 0)
+                {
+                    DoGetScanWorker.ReportProgress(-1, "DTWAIN_StartThread_FAILED");
+                    return;
+                }
                 DoGetScanWorker.ReportProgress(2, "DTWAIN_StartTwainSession");
-                //StartTwainSession first argument parent window, second argument DLL file;
-                TwainAPI.DTWAIN_StartTwainSession(IntPtr.Zero,null);
+                S.Restart();
+                RetS = 0;
+                while (RetS == 0 && S.ElapsedMilliseconds < 5_000)
+                    //StartTwainSession first argument parent window, second argument DLL file;
+                    RetS = TwainAPI.DTWAIN_StartTwainSession(IntPtr.Zero, null);
+                if (RetS == 0)
+                {
+                    DoGetScanWorker.ReportProgress(-1, "DTWAIN_StartTwainSession_FAILED");
+                    S.Restart();
+                    RetS = 0;
+                    while (RetS == 0 && S.ElapsedMilliseconds < 1_000)
+                        RetS = TwainAPI.DTWAIN_EndThread(DTWAINHelper.DTWAINThread);
+                    if (RetS == 0)
+                        DoGetScanWorker.ReportProgress(-1, "DTWAIN_EndThread_FAILED");
+                    return;
+                }
                 DTWAINHelper.IsDTWAINBusy = true;
 
                 DTWAIN_ARRAY PtrArraySources = IntPtr.Zero;
@@ -265,16 +289,31 @@ namespace CobaScanner
                                 DTWAINHelper.SelectedScanner.Equals(SourceName.ToString())
                                 ) && result.SelectedScanner == null)
                                 {
-                                    result.SelectedScanner = new ScannerProperties();
-                                    result.SelectedScanner.ProductName = SourceName.ToString();
-                                    result.SelectedScanner.IsSupportFeeder = TwainAPI.DTWAIN_IsFeederSupported(PtrSource) == 1;
-                                    if (result.SelectedScanner.IsSupportFeeder)
+                                    S.Restart();
+                                    while (TwainAPI.DTWAIN_IsSourceOpen(PtrSource) == 0 && S.ElapsedMilliseconds < 5_000)
+                                        TwainAPI.DTWAIN_OpenSource(PtrSource);
+                                    if (TwainAPI.DTWAIN_IsSourceOpen(PtrSource) == 1)
                                     {
-                                        result.SelectedScanner.IsSupportDuplex = TwainAPI.DTWAIN_IsDuplexSupported(PtrSource) == 1;
-                                    }
+                                        result.SelectedScanner = new ScannerProperties();
+                                        result.SelectedScanner.ProductName = SourceName.ToString();
+                                        result.SelectedScanner.IsSupportFeeder = TwainAPI.DTWAIN_IsFeederSupported(PtrSource) == 1;
+                                        if (result.SelectedScanner.IsSupportFeeder)
+                                        {
+                                            result.SelectedScanner.IsSupportDuplex = TwainAPI.DTWAIN_IsDuplexSupported(PtrSource) == 1;
+                                        }
+                                        else
+                                        {
+                                            result.SelectedScanner.IsSupportDuplex = false;
+                                        }
+                                        S.Restart();
+                                        while (TwainAPI.DTWAIN_IsSourceOpen(PtrSource) == 1 && S.ElapsedMilliseconds < 5_000)
+                                            TwainAPI.DTWAIN_CloseSource(PtrSource);
+                                        if (TwainAPI.DTWAIN_IsSourceOpen(PtrSource) == 1)
+                                            DoGetScanWorker.ReportProgress(-1, "DTWAIN_CloseSource_FAILED");
+                                    } 
                                     else
                                     {
-                                        result.SelectedScanner.IsSupportDuplex = false;
+                                        DoGetScanWorker.ReportProgress(-1, "SCANNER_NOT_OPENED");
                                     }
                                 }
                             }
@@ -291,9 +330,19 @@ namespace CobaScanner
                 }
 
                 DoGetScanWorker.ReportProgress(98, "DTWAIN_EndTwainSession");
-                TwainAPI.DTWAIN_EndTwainSession();
+                S.Restart();
+                RetS = 0;
+                while (RetS == 0 && S.ElapsedMilliseconds < 5_000)
+                    RetS = TwainAPI.DTWAIN_EndTwainSession();
+                if (RetS == 0)
+                    DoGetScanWorker.ReportProgress(-1, "DTWAIN_EndTwainSession_FAILED");
                 DoGetScanWorker.ReportProgress(99, "DTWAIN_EndThread");
-                TwainAPI.DTWAIN_EndThread(DTWAINHelper.DTWAINThread);
+                S.Restart();
+                RetS = 0;
+                while (RetS == 0 && S.ElapsedMilliseconds < 1_000)
+                    RetS = TwainAPI.DTWAIN_EndThread(DTWAINHelper.DTWAINThread);
+                if (RetS == 0)
+                    DoGetScanWorker.ReportProgress(-1, "DTWAIN_EndThread_FAILED");
                 DTWAINHelper.IsDTWAINBusy = false;
 
                 e.Result = result;
@@ -379,11 +428,35 @@ namespace CobaScanner
                     DoSetScanWorker.ReportProgress(-1, "DTWAIN_NOT_FOUND");
                     return;
                 }
+                Stopwatch S = new Stopwatch();
+                int RetS = 0;
                 DoSetScanWorker.ReportProgress(1, "DTWAIN_StartThread");
-                TwainAPI.DTWAIN_StartThread(DTWAINHelper.DTWAINThread);
+                S.Restart();
+                RetS = 0;
+                while (RetS == 0 && S.ElapsedMilliseconds < 5_000)
+                    RetS = TwainAPI.DTWAIN_StartThread(DTWAINHelper.DTWAINThread);
+                if (RetS == 0)
+                {
+                    DoSetScanWorker.ReportProgress(-1, "DTWAIN_StartThread_FAILED");
+                    return;
+                }
                 DoSetScanWorker.ReportProgress(2, "DTWAIN_StartTwainSession");
-                //StartTwainSession first argument parent window, second argument DLL file;
-                TwainAPI.DTWAIN_StartTwainSession(IntPtr.Zero, null);
+                S.Restart();
+                RetS = 0;
+                while (RetS == 0 && S.ElapsedMilliseconds < 5_000)
+                    //StartTwainSession first argument parent window, second argument DLL file;
+                    RetS = TwainAPI.DTWAIN_StartTwainSession(IntPtr.Zero, null);
+                if (RetS == 0)
+                {
+                    DoSetScanWorker.ReportProgress(-1, "DTWAIN_StartTwainSession_FAILED");
+                    S.Restart();
+                    RetS = 0;
+                    while (RetS == 0 && S.ElapsedMilliseconds < 1_000)
+                        RetS = TwainAPI.DTWAIN_EndThread(DTWAINHelper.DTWAINThread);
+                    if (RetS == 0)
+                        DoSetScanWorker.ReportProgress(-1, "DTWAIN_EndThread_FAILED");
+                    return;
+                }
                 DTWAINHelper.IsDTWAINBusy = true;
 
                 DoSetScanWorker.ReportProgress(3, "DTWAIN_SelectSourceByName");
@@ -391,18 +464,35 @@ namespace CobaScanner
 
                 if (PtrSouce != IntPtr.Zero)
                 {
-                    //Source Setting
-                    DoSetScanWorker.ReportProgress(4, "DTWAIN_IsFeederDuplexSupported");
-                    result = new ScannerProperties();
-                    result.ProductName = args;
-                    result.IsSupportFeeder = TwainAPI.DTWAIN_IsFeederSupported(PtrSouce) == 1;
-                    if (result.IsSupportFeeder)
+                    DoSetScanWorker.ReportProgress(4, "DTWAIN_OpenSource");
+                    S.Restart();
+                    while (TwainAPI.DTWAIN_IsSourceOpen(PtrSouce) == 0 && S.ElapsedMilliseconds < 5_000)
+                        TwainAPI.DTWAIN_OpenSource(PtrSouce);
+                    if (TwainAPI.DTWAIN_IsSourceOpen(PtrSouce) == 1)
                     {
-                        result.IsSupportDuplex = TwainAPI.DTWAIN_IsDuplexSupported(PtrSouce) == 1;
+                        //Source Setting
+                        DoSetScanWorker.ReportProgress(4, "DTWAIN_IsFeederDuplexSupported");
+                        result = new ScannerProperties();
+                        result.ProductName = args;
+                        result.IsSupportFeeder = TwainAPI.DTWAIN_IsFeederSupported(PtrSouce) == 1;
+                        if (result.IsSupportFeeder)
+                        {
+                            result.IsSupportDuplex = TwainAPI.DTWAIN_IsDuplexSupported(PtrSouce) == 1;
+                        }
+                        else
+                        {
+                            result.IsSupportDuplex = false;
+                        }
+                        DoSetScanWorker.ReportProgress(97, "DTWAIN_CloseSource");
+                        S.Restart();
+                        while (TwainAPI.DTWAIN_IsSourceOpen(PtrSouce) == 1 && S.ElapsedMilliseconds < 5_000)
+                            TwainAPI.DTWAIN_CloseSource(PtrSouce);
+                        if (TwainAPI.DTWAIN_IsSourceOpen(PtrSouce) == 1)
+                            DoSetScanWorker.ReportProgress(-1, "DTWAIN_CloseSource_FAILED");
                     }
                     else
                     {
-                        result.IsSupportDuplex = false;
+                        DoSetScanWorker.ReportProgress(-1, "SCANNER_NOT_OPENED");
                     }
                 }
                 else
@@ -411,9 +501,20 @@ namespace CobaScanner
                 }
 
                 DoSetScanWorker.ReportProgress(98, "DTWAIN_EndTwainSession");
-                TwainAPI.DTWAIN_EndTwainSession();
+                S.Restart();
+                RetS = 0;
+                while (RetS == 0 && S.ElapsedMilliseconds < 5_000)
+                    RetS = TwainAPI.DTWAIN_EndTwainSession();
+                if (RetS == 0)
+                    DoSetScanWorker.ReportProgress(-1, "DTWAIN_EndTwainSession_FAILED");
                 DoSetScanWorker.ReportProgress(99, "DTWAIN_EndThread");
-                TwainAPI.DTWAIN_EndThread(DTWAINHelper.DTWAINThread);
+                S.Restart();
+                RetS = 0;
+                while (RetS == 0 && S.ElapsedMilliseconds < 1_000)
+                    RetS = TwainAPI.DTWAIN_EndThread(DTWAINHelper.DTWAINThread);
+                if (RetS == 0)
+                    DoSetScanWorker.ReportProgress(-1, "DTWAIN_EndThread_FAILED");
+
                 DTWAINHelper.IsDTWAINBusy = false;
 
                 e.Result = result;
@@ -534,11 +635,40 @@ namespace CobaScanner
                     this.formStatus.TopLevel = true;
                     this.formStatus.TopMost = true;
                 });
+
+                Stopwatch S = new Stopwatch();
+                int RetS = 0;
                 DoScanReportProgressInterceptor(1, "DTWAIN_StartThread");
-                TwainAPI.DTWAIN_StartThread(DTWAINHelper.DTWAINThread);
+                S.Restart();
+                RetS = 0;
+                while (RetS == 0 && S.ElapsedMilliseconds < 5_000)
+                    RetS = TwainAPI.DTWAIN_StartThread(DTWAINHelper.DTWAINThread);
+                if (RetS == 0)
+                {
+                    DoScanReportProgressInterceptor(-1, "DTWAIN_StartThread_FAILED");
+                    this.formStatus.Dispose();
+                    this.formStatus = null;
+                    return;
+                }
                 DoScanReportProgressInterceptor(2, "DTWAIN_StartTwainSession");
-                //StartTwainSession first argument parent window, second argument DLL file;
-                TwainAPI.DTWAIN_StartTwainSession(this.formStatus.Handle, null);
+                S.Restart();
+                RetS = 0;
+                while (RetS == 0 && S.ElapsedMilliseconds < 5_000)
+                    //StartTwainSession first argument parent window, second argument DLL file;
+                    RetS = TwainAPI.DTWAIN_StartTwainSession(this.formStatus.Handle, null);
+                if (RetS == 0)
+                {
+                    DoScanReportProgressInterceptor(-1, "DTWAIN_StartTwainSession_FAILED");
+                    S.Restart();
+                    RetS = 0;
+                    while (RetS == 0 && S.ElapsedMilliseconds < 1_000)
+                        RetS = TwainAPI.DTWAIN_EndThread(DTWAINHelper.DTWAINThread);
+                    if (RetS == 0)
+                        DoScanReportProgressInterceptor(-1, "DTWAIN_EndThread_FAILED");
+                    this.formStatus.Dispose();
+                    this.formStatus = null;
+                    return;
+                }
                 DTWAINHelper.IsDTWAINBusy = true;
                 DTWAINHelper.KeepScanning = true;
                 DoScanReportProgressInterceptor(2, "DTWAIN_SetCallback");
@@ -551,7 +681,10 @@ namespace CobaScanner
                 if (PtrSouce != IntPtr.Zero)
                 {
                     DoScanReportProgressInterceptor(4, "DTWAIN_OpenSource");
-                    if (TwainAPI.DTWAIN_OpenSource(PtrSouce) == 1)
+                    S.Restart();
+                    while(TwainAPI.DTWAIN_IsSourceOpen(PtrSouce) == 0 && S.ElapsedMilliseconds < 5_000)
+                        TwainAPI.DTWAIN_OpenSource(PtrSouce);
+                    if (TwainAPI.DTWAIN_IsSourceOpen(PtrSouce) == 1)
                     {
                         //Source Setting
                         /*DoScanWorker.ReportProgress(5, "DTWAIN_IsIndicatorSupported");
@@ -652,9 +785,18 @@ namespace CobaScanner
                         }
 
                         DoScanReportProgressInterceptor(96, "DTWAIN_DestroyAcquisitionArray");
-                        TwainAPI.DTWAIN_DestroyAcquisitionArray(AcqArray, 1);
+                        S.Restart();
+                        RetS = 0;
+                        while (RetS == 0 && S.ElapsedMilliseconds < 300_000)
+                            RetS = TwainAPI.DTWAIN_DestroyAcquisitionArray(AcqArray, 1);
+                        if(RetS == 0)
+                            DoScanReportProgressInterceptor(-1, "DTWAIN_DestroyAcquisitionArray_FAILED");
                         DoScanReportProgressInterceptor(97, "DTWAIN_CloseSource");
-                        TwainAPI.DTWAIN_CloseSource(PtrSouce);
+                        S.Restart();
+                        while (TwainAPI.DTWAIN_IsSourceOpen(PtrSouce) == 1 && S.ElapsedMilliseconds < 5_000)
+                            TwainAPI.DTWAIN_CloseSource(PtrSouce);
+                        if (TwainAPI.DTWAIN_IsSourceOpen(PtrSouce) == 1)
+                            DoScanReportProgressInterceptor(-1, "DTWAIN_CloseSource_FAILED");
                     }
                     else
                     {
@@ -667,9 +809,19 @@ namespace CobaScanner
                 }
 
                 DoScanReportProgressInterceptor(98, "DTWAIN_EndTwainSession");
-                TwainAPI.DTWAIN_EndTwainSession();
+                S.Restart();
+                RetS = 0;
+                while (RetS == 0 && S.ElapsedMilliseconds < 5_000)
+                    RetS = TwainAPI.DTWAIN_EndTwainSession();
+                if (RetS == 0)
+                    DoScanReportProgressInterceptor(-1, "DTWAIN_EndTwainSession_FAILED");
                 DoScanReportProgressInterceptor(99, "DTWAIN_EndThread");
-                TwainAPI.DTWAIN_EndThread(DTWAINHelper.DTWAINThread);
+                S.Restart();
+                RetS = 0;
+                while (RetS == 0 && S.ElapsedMilliseconds < 1_000)
+                    RetS = TwainAPI.DTWAIN_EndThread(DTWAINHelper.DTWAINThread);
+                if (RetS == 0)
+                    DoScanReportProgressInterceptor(-1, "DTWAIN_EndThread_FAILED");
                 DTWAINHelper.IsDTWAINBusy = false;
                 DTWAINHelper.KeepScanning = false;
                 this.formStatus.Dispose();
@@ -755,7 +907,7 @@ namespace CobaScanner
             {
                 DoScanWorker.ReportProgress(ProgressPercentage, code);
             }
-            if (this.formStatus != null && this.formStatus.IsHandleCreated && this.formStatus.Visible)
+            if (ProgressPercentage > 0 && this.formStatus != null && this.formStatus.IsHandleCreated && this.formStatus.Visible)
             {
                 this.formStatus.Invoke((MethodInvoker)delegate
                 {
