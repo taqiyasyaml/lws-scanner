@@ -373,8 +373,8 @@ namespace CobaScanner
                 RetS = 0;
                 while (RetS == 0 && S.ElapsedMilliseconds < 1_000)
                     RetS = TwainAPI.DTWAIN_EndThread(DTWAINHelper.DTWAINThread);
-                if (RetS == 0)
-                    DoGetScanWorker.ReportProgress(-1, "DTWAIN_EndThread_FAILED");
+                /*if (RetS == 0)
+                    DoGetScanWorker.ReportProgress(-1, "DTWAIN_EndThread_FAILED");*/
                 DTWAINHelper.IsDTWAINBusy = false;
 
                 e.Result = result;
@@ -546,8 +546,8 @@ namespace CobaScanner
                 RetS = 0;
                 while (RetS == 0 && S.ElapsedMilliseconds < 1_000)
                     RetS = TwainAPI.DTWAIN_EndThread(DTWAINHelper.DTWAINThread);
-                if (RetS == 0)
-                    DoSetScanWorker.ReportProgress(-1, "DTWAIN_EndThread_FAILED");
+                /*if (RetS == 0)
+                    DoSetScanWorker.ReportProgress(-1, "DTWAIN_EndThread_FAILED");*/
 
                 DTWAINHelper.IsDTWAINBusy = false;
 
@@ -867,8 +867,8 @@ namespace CobaScanner
                 RetS = 0;
                 while (RetS == 0 && S.ElapsedMilliseconds < 1_000)
                     RetS = TwainAPI.DTWAIN_EndThread(DTWAINHelper.DTWAINThread);
-                if (RetS == 0)
-                    DoScanReportProgressInterceptor(-1, "DTWAIN_EndThread_FAILED");
+                /*if (RetS == 0)
+                    DoScanReportProgressInterceptor(-1, "DTWAIN_EndThread_FAILED");*/
                 DTWAINHelper.IsDTWAINBusy = false;
                 DTWAINHelper.KeepScanning = false;
                 if (this.formStatus != null)
