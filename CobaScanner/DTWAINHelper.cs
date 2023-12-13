@@ -816,10 +816,12 @@ namespace CobaScanner
                                     Bitmap BmpScan = Bitmap.FromHbitmap(TwainAPI.DTWAIN_ConvertDIBToBitmap(PtrDib, IntPtr.Zero));
                                     MemoryStream StreamScan = new MemoryStream();
                                     BmpScan.Save(StreamScan, JpegCodecInfo, EncoderParams);
-                                    this.ViewScanImages.AddImage(IAcq, IDib, StreamScan);
-                                    String Base64Scan = "data:image/jpeg;base64," + Convert.ToBase64String(StreamScan.ToArray());
-                                    JDib.Add(Base64Scan);
+                                    String Base64Scan = Convert.ToBase64String(StreamScan.ToArray());
+                                    this.ViewScanImages.AddImage(IAcq, IDib, Base64Scan);
+                                    JDib.Add("data:image/jpeg;base64," + Base64Scan);
                                     BmpScan.Dispose();
+                                    StreamScan.Dispose();
+                                    StreamScan.Close();
                                     /*Debug.WriteLine(Base64Scan);*/
                                 }
                                 JAcq.Add(JDib);
