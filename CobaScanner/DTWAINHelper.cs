@@ -84,6 +84,10 @@ namespace CobaScanner
         public static readonly int[] ColorInts = new int[] { 1000, 0, 1, 2, 5 };
         private static DTWAIN_HANDLE DTWAINThread;
 
+        private static readonly bool NeedSaveLogFile = true;
+        private static String SaveAppLogFile = "";
+        private static String SaveDTwainLogFile = "";
+
         public static bool StartDTWAIN()
         {
             if (TwainAPI.DTWAIN_IsTwainAvailable() != 1)
@@ -93,6 +97,18 @@ namespace CobaScanner
             }
             TwainAPI.DTWAIN_UseMultipleThreads(1);
             DTWAINHelper.DTWAINThread = TwainAPI.DTWAIN_SysInitialize();
+            if(DTWAINHelper.NeedSaveLogFile)
+            {
+                string FileLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                string FolderLocation = System.IO.Path.Combine(Path.GetDirectoryName(FileLocation)!, "logs");
+                if (!Directory.Exists(FolderLocation))
+                {
+                    Directory.CreateDirectory(FolderLocation);
+                }
+                DTWAINHelper.SaveAppLogFile = System.IO.Path.Combine(FolderLocation, DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "-app.log.txt");
+                DTWAINHelper.SaveDTwainLogFile = System.IO.Path.Combine(FolderLocation, DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "-dtwain.log.txt");
+                TwainAPI.DTWAIN_SetTwainLog(TwainAPI.DTWAIN_LOG_USEFILE, DTWAINHelper.SaveDTwainLogFile);
+            }
             return true;
         }
 
@@ -393,11 +409,13 @@ namespace CobaScanner
                     {
                         MessageBox.Show(message, "ERROR");
                     }
+                    DTWAINHelper.SaveLog("DoGetScanWorker", "onGetProggress : " + message);
                 }
                 if (e.ProgressPercentage > 0)
                 {
                     this.scannerLabel.Text = "(" + e.ProgressPercentage.ToString() + "% " + message + ")";
                     Debug.WriteLine("(" + e.ProgressPercentage.ToString() + "% " + message + ")");
+                    DTWAINHelper.SaveLog("DoGetScanWorker", "onGetProggress : " + "(" + e.ProgressPercentage.ToString() + "% " + message + ")");
                 }
             };
             DoGetScanWorker.RunWorkerCompleted += (object sender, RunWorkerCompletedEventArgs e) =>
@@ -566,11 +584,13 @@ namespace CobaScanner
                     {
                         MessageBox.Show(message, "ERROR");
                     }
+                    DTWAINHelper.SaveLog("DoSetScanWorker", "onSetError : "+message);
                 }
                 if (e.ProgressPercentage > 0)
                 {
                     this.scannerLabel.Text = "(" + e.ProgressPercentage.ToString() + "% " + message + ")";
                     Debug.WriteLine("(" + e.ProgressPercentage.ToString() + "% " + message + ")");
+                    DTWAINHelper.SaveLog("DoSetScanWorker", "onSetProggress : " + "(" + e.ProgressPercentage.ToString() + "% " + message + ")");
                 }
             };
             DoSetScanWorker.RunWorkerCompleted += (object sender, RunWorkerCompletedEventArgs e) =>
@@ -678,6 +698,7 @@ namespace CobaScanner
                 {
                     this.formStatus = null;
                 }
+                DTWAINHelper.SaveLog("DoScanWorker", "Start DoScanWorker");
                 Stopwatch S = new Stopwatch();
                 int RetS = 0;
                 DoScanReportProgressInterceptor(1, "DTWAIN_StartThread");
@@ -790,6 +811,7 @@ namespace CobaScanner
                             int pStatus = 0;
                             DoScanReportProgressInterceptor(17, "DTWAIN_AcquireNativeEx");
                             int AcquireCodeResult = 0;
+                            DTWAINHelper.SaveLog("DoScanWorker", "Start Acquisition");
                             AcquireCodeResult = TwainAPI.DTWAIN_AcquireNativeEx(
                                 PtrSouce,
                                 args.Color,
@@ -799,6 +821,7 @@ namespace CobaScanner
                                 AcqArray,
                                 ref pStatus
                             );
+                            DTWAINHelper.SaveLog("DoScanWorker", "Finish Acquisition");
                             if (AcquireCodeResult == 1)
                             {
                                 // 20% - 80%
@@ -829,16 +852,17 @@ namespace CobaScanner
                                     JAcq.Add(JDib);
                                 }
                                 result["data"] = JAcq;
+                                DTWAINHelper.SaveLog("DoScanWorker", "Finish Process Acquisition");
                             }
                             else
                             {
                                 DoScanReportProgressInterceptor(-1, "ACQ_FAILED");
                             }
                         }
-                        catch (Exception e)
+                        catch (Exception ex)
                         {
                             DoScanReportProgressInterceptor(-1, "ACQ_FAILED");
-                            DoScanReportProgressInterceptor(-1, e.Message);
+                            DoScanReportProgressInterceptor(-1, ex.Message);
                         }
                         DoScanReportProgressInterceptor(96, "DTWAIN_DestroyAcquisitionArray");
                         S.Restart();
@@ -880,6 +904,7 @@ namespace CobaScanner
                     DoScanReportProgressInterceptor(-1, "DTWAIN_EndThread_FAILED");*/
                 DTWAINHelper.IsDTWAINBusy = false;
                 DTWAINHelper.KeepScanning = false;
+                DTWAINHelper.SaveLog("DoScanWorker", "Finish DoScanWorker");
                 if (this.formStatus != null)
                     this.formStatus.Dispose();
                 this.formStatus = null;
@@ -897,12 +922,14 @@ namespace CobaScanner
                 {
                     result["request"] = "onScanError";
                     result["error"] = code;
+                    DTWAINHelper.SaveLog("DoScanWorker", "onScanError : " + code);
                 }
                 if (e.ProgressPercentage == 0)
                 {
                     Debug.WriteLine("Acquire Callback : " + code);
                     result["request"] = "onScanCallback";
                     result["status"] = code;
+                    DTWAINHelper.SaveLog("DoScanWorker", "onScanCallback : " + code);
                 }
                 if (e.ProgressPercentage > 0)
                 {
@@ -910,6 +937,7 @@ namespace CobaScanner
                     {
                         this.scannerLabel.Text = DTWAINHelper.SelectedScanner + " (" + e.ProgressPercentage.ToString() + "% " + code + ")";
                     });
+                    DTWAINHelper.SaveLog("DoScanWorker", "onScanNotification : " + DTWAINHelper.SelectedScanner + " (" + e.ProgressPercentage.ToString() + "% " + code + ")");
                     Debug.WriteLine(DTWAINHelper.SelectedScanner + " (" + e.ProgressPercentage.ToString() + "% " + code + ")");
                     result["request"] = "onScanNotification";
                     result["percentage"] = e.ProgressPercentage;
@@ -932,8 +960,6 @@ namespace CobaScanner
                             MessageBox.Show(code, "ERROR");
                         }
                     });
-                    result["request"] = "onScanError";
-                    result["error"] = code;
                 }
             };
             DoScanWorker.RunWorkerCompleted += (object sender, RunWorkerCompletedEventArgs e) =>
@@ -952,9 +978,15 @@ namespace CobaScanner
                 });
                 if (socket != null)
                 {
+                    DTWAINHelper.SaveLog("DoScanWorker", "Start Send to WebSocket");
                     if (e.Result is string && socket.IsAvailable)
                         socket.Send((string)e.Result);
                     socket = null;
+                    DTWAINHelper.SaveLog("DoScanWorker", "Finish Send to WebSocket");
+                }
+                else
+                {
+                    DTWAINHelper.SaveLog("DoScanWorker", "No Message to WebSocket");
                 }
             };
         }
@@ -1185,6 +1217,33 @@ namespace CobaScanner
         public void Cancel()
         {
 
+        }
+
+        public static void SaveLog(String Parent, String Message)
+        {
+            if (DTWAINHelper.SaveAppLogFile.Length > 0)
+            {
+                Process P = Process.GetCurrentProcess();
+                long RAMConsumption = P.WorkingSet64;
+                String RAMUsage = RAMConsumption.ToString() + " B";
+                if (RAMConsumption > 1024)
+                {
+                    RAMConsumption /= 1024;
+                    RAMUsage = RAMConsumption.ToString() + " KB";
+                }
+                if (RAMConsumption > 1024)
+                {
+                    RAMConsumption /= 1024;
+                    RAMUsage = RAMConsumption.ToString() + " MB";
+                }
+                if (RAMConsumption > 1024)
+                {
+                    RAMConsumption /= 1024;
+                    RAMUsage = RAMConsumption.ToString() + " GB";
+                }
+                String SaveToLog = DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "UTC - " + Parent + " - RAM : " + RAMUsage + "\n" + Message + "\n";
+                File.AppendAllText(DTWAINHelper.SaveAppLogFile, SaveToLog);
+            }
         }
     }
 }
