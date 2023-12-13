@@ -14,11 +14,11 @@ namespace CobaScanner
             public int Acq;
             public int Page;
             public MemoryStream ImgStream;
-            public ImageMetadata(int Acq, int Page, String ImgStreamBase64)
+            public ImageMetadata(int Acq, int Page, MemoryStream ImgStream)
             {
                 this.Acq = Acq;
                 this.Page = Page;
-                this.ImgStream = new MemoryStream(Convert.FromBase64String(ImgStreamBase64));
+                this.ImgStream = ImgStream;
             }
         }
 
@@ -63,9 +63,9 @@ namespace CobaScanner
             PreviewScannedImages.ScannedImages.Clear();
         }
 
-        public void AddImage(int Acq, int Page, String ImgStreamBase64)
+        public void AddImage(int Acq, int Page, MemoryStream ImgStream)
         {
-            PreviewScannedImages.ScannedImages.Add(new ImageMetadata(Acq, Page, ImgStreamBase64));
+            PreviewScannedImages.ScannedImages.Add(new ImageMetadata(Acq, Page, ImgStream));
             if (PreviewScannedImages.ScannedImages.Count == 1)
             {
                 PreviewScannedImages.IndexImage = 0;

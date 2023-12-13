@@ -107,7 +107,7 @@ namespace CobaScanner
                 }
                 DTWAINHelper.SaveAppLogFile = System.IO.Path.Combine(FolderLocation, DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "-app.log.txt");
                 DTWAINHelper.SaveDTwainLogFile = System.IO.Path.Combine(FolderLocation, DateTime.UtcNow.ToString("yyyyMMddHHmmss") + "-dtwain.log.txt");
-                TwainAPI.DTWAIN_SetTwainLog(TwainAPI.DTWAIN_LOG_USEFILE, DTWAINHelper.SaveDTwainLogFile);
+                TwainAPI.DTWAIN_SetTwainLog(TwainAPI.DTWAIN_LOG_FILEAPPEND, DTWAINHelper.SaveDTwainLogFile);
             }
             return true;
         }
@@ -836,17 +836,19 @@ namespace CobaScanner
                                     JsonArray JDib = new JsonArray();
                                     for (int IDib = 0; IDib < CountDib; IDib++)
                                     {
+                                        DTWAINHelper.SaveLog("DoScanWorker", "Before Process Acq "+IAcq+" DIB "+IDib);
                                         DoScanReportProgressInterceptor(20 + IAcq * PercentEachAcq + IDib * PercentEachDib, "PROCESS_DIB");
                                         DTWAIN_HANDLE PtrDib = TwainAPI.DTWAIN_GetAcquiredImage(AcqArray, IAcq, IDib);
                                         Bitmap BmpScan = Bitmap.FromHbitmap(TwainAPI.DTWAIN_ConvertDIBToBitmap(PtrDib, IntPtr.Zero));
+                                        DTWAINHelper.SaveLog("DoScanWorker", "After Create Bitmap " + IAcq + " DIB " + IDib);
                                         MemoryStream StreamScan = new MemoryStream();
                                         BmpScan.Save(StreamScan, JpegCodecInfo, EncoderParams);
+                                        DTWAINHelper.SaveLog("DoScanWorker", "After Compress Bitmap Acq " + IAcq + " DIB " + IDib);
                                         String Base64Scan = Convert.ToBase64String(StreamScan.ToArray());
-                                        this.ViewScanImages.AddImage(IAcq, IDib, Base64Scan);
+                                        this.ViewScanImages.AddImage(IAcq, IDib, StreamScan);
                                         JDib.Add("data:image/jpeg;base64," + Base64Scan);
                                         BmpScan.Dispose();
-                                        StreamScan.Dispose();
-                                        StreamScan.Close();
+                                        DTWAINHelper.SaveLog("DoScanWorker", "After Dispose Bitmap " + IAcq + " DIB " + IDib);
                                         /*Debug.WriteLine(Base64Scan);*/
                                     }
                                     JAcq.Add(JDib);
