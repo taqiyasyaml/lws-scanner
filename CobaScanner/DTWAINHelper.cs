@@ -785,54 +785,61 @@ namespace CobaScanner
                         //Inside Acquistion Array are DIB Array
                         DoScanReportProgressInterceptor(16, "DTWAIN_CreateAcquisitionArray");
                         DTWAIN_ARRAY AcqArray = TwainAPI.DTWAIN_CreateAcquisitionArray();
-                        int pStatus = 0;
-                        DoScanReportProgressInterceptor(17, "DTWAIN_AcquireNativeEx");
-                        int AcquireCodeResult = 0;
-                        AcquireCodeResult = TwainAPI.DTWAIN_AcquireNativeEx(
-                            PtrSouce,
-                            args.Color,
-                            args.MaxPage == 0 ? TwainAPI.DTWAIN_ACQUIREALL : args.MaxPage,
-                            args.SourceUI ? 1 : 0,
-                            0,
-                            AcqArray,
-                            ref pStatus
-                        );
-                        if (AcquireCodeResult == 1)
+                        try
                         {
-                            // 20% - 80%
-                            int CountAcq = TwainAPI.DTWAIN_GetNumAcquisitions(AcqArray);
-                            int PercentEachAcq = 60 / CountAcq;
-                            JsonArray JAcq = new JsonArray();
-                            for (int IAcq = 0; IAcq < CountAcq; IAcq++)
+                            int pStatus = 0;
+                            DoScanReportProgressInterceptor(17, "DTWAIN_AcquireNativeEx");
+                            int AcquireCodeResult = 0;
+                            AcquireCodeResult = TwainAPI.DTWAIN_AcquireNativeEx(
+                                PtrSouce,
+                                args.Color,
+                                args.MaxPage == 0 ? TwainAPI.DTWAIN_ACQUIREALL : args.MaxPage,
+                                args.SourceUI ? 1 : 0,
+                                0,
+                                AcqArray,
+                                ref pStatus
+                            );
+                            if (AcquireCodeResult == 1)
                             {
-                                DoScanReportProgressInterceptor(20 + IAcq * PercentEachAcq, "PROCESS_ACQ");
-                                int CountDib = TwainAPI.DTWAIN_GetNumAcquiredImages(AcqArray, IAcq);
-                                int PercentEachDib = PercentEachAcq / CountDib;
-                                JsonArray JDib = new JsonArray();
-                                for (int IDib = 0; IDib < CountDib; IDib++)
+                                // 20% - 80%
+                                int CountAcq = TwainAPI.DTWAIN_GetNumAcquisitions(AcqArray);
+                                int PercentEachAcq = 60 / CountAcq;
+                                JsonArray JAcq = new JsonArray();
+                                for (int IAcq = 0; IAcq < CountAcq; IAcq++)
                                 {
-                                    DoScanReportProgressInterceptor(20 + IAcq * PercentEachAcq + IDib * PercentEachDib, "PROCESS_DIB");
-                                    DTWAIN_HANDLE PtrDib = TwainAPI.DTWAIN_GetAcquiredImage(AcqArray, IAcq, IDib);
-                                    Bitmap BmpScan = Bitmap.FromHbitmap(TwainAPI.DTWAIN_ConvertDIBToBitmap(PtrDib, IntPtr.Zero));
-                                    MemoryStream StreamScan = new MemoryStream();
-                                    BmpScan.Save(StreamScan, JpegCodecInfo, EncoderParams);
-                                    String Base64Scan = Convert.ToBase64String(StreamScan.ToArray());
-                                    this.ViewScanImages.AddImage(IAcq, IDib, Base64Scan);
-                                    JDib.Add("data:image/jpeg;base64," + Base64Scan);
-                                    BmpScan.Dispose();
-                                    StreamScan.Dispose();
-                                    StreamScan.Close();
-                                    /*Debug.WriteLine(Base64Scan);*/
+                                    DoScanReportProgressInterceptor(20 + IAcq * PercentEachAcq, "PROCESS_ACQ");
+                                    int CountDib = TwainAPI.DTWAIN_GetNumAcquiredImages(AcqArray, IAcq);
+                                    int PercentEachDib = PercentEachAcq / CountDib;
+                                    JsonArray JDib = new JsonArray();
+                                    for (int IDib = 0; IDib < CountDib; IDib++)
+                                    {
+                                        DoScanReportProgressInterceptor(20 + IAcq * PercentEachAcq + IDib * PercentEachDib, "PROCESS_DIB");
+                                        DTWAIN_HANDLE PtrDib = TwainAPI.DTWAIN_GetAcquiredImage(AcqArray, IAcq, IDib);
+                                        Bitmap BmpScan = Bitmap.FromHbitmap(TwainAPI.DTWAIN_ConvertDIBToBitmap(PtrDib, IntPtr.Zero));
+                                        MemoryStream StreamScan = new MemoryStream();
+                                        BmpScan.Save(StreamScan, JpegCodecInfo, EncoderParams);
+                                        String Base64Scan = Convert.ToBase64String(StreamScan.ToArray());
+                                        this.ViewScanImages.AddImage(IAcq, IDib, Base64Scan);
+                                        JDib.Add("data:image/jpeg;base64," + Base64Scan);
+                                        BmpScan.Dispose();
+                                        StreamScan.Dispose();
+                                        StreamScan.Close();
+                                        /*Debug.WriteLine(Base64Scan);*/
+                                    }
+                                    JAcq.Add(JDib);
                                 }
-                                JAcq.Add(JDib);
+                                result["data"] = JAcq;
                             }
-                            result["data"] = JAcq;
+                            else
+                            {
+                                DoScanReportProgressInterceptor(-1, "ACQ_FAILED");
+                            }
                         }
-                        else
+                        catch (Exception e)
                         {
                             DoScanReportProgressInterceptor(-1, "ACQ_FAILED");
+                            DoScanReportProgressInterceptor(-1, e.Message);
                         }
-
                         DoScanReportProgressInterceptor(96, "DTWAIN_DestroyAcquisitionArray");
                         S.Restart();
                         RetS = 0;
